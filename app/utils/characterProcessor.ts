@@ -109,6 +109,7 @@ export function processPathbuilderCharacter(pathbuilderData: PathbuilderCharacte
     name: build.name,
     class: build.class,
     level: build.level,
+    ancestry: build.ancestry,
     abilities: build.abilities,
     proficiencies: build.proficiencies,
     skills,

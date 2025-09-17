@@ -164,6 +164,7 @@ export interface ProcessedCharacter {
   name: string;
   class: string;
   level: number;
+  ancestry: string;
   abilities: Abilities;
   proficiencies: Proficiencies;
   skills: SkillData[];

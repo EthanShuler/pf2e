@@ -18,7 +18,7 @@ import {
 import { IconUpload, IconUser, IconAlertCircle, IconCheck, IconTrash } from '@tabler/icons-react';
 import { PathbuilderCharacter, ProcessedCharacter } from '../../types/character';
 import { processPathbuilderCharacter } from '../../utils/characterProcessor';
-import classes from './CharacterManager.module.css';
+import styles from './CharacterManager.module.css';
 
 interface CharacterManagerProps {
   characters: ProcessedCharacter[];
@@ -104,7 +104,7 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
   };
 
   return (
-    <Paper p="xl" shadow="sm" className={classes.container}>
+    <Paper p="xl" shadow="sm" className={styles.container}>
       <Stack gap="xl">
         <Group justify="center">
           <IconUser size={32} />
@@ -156,18 +156,18 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
         {characters.length > 0 && (
           <>
             <Divider label={`${characters.length} Character(s) Loaded`} labelPosition="center" />
-            <ScrollArea h={400}>
+            <ScrollArea h={900}>
               <Grid>
                 {characters.map((character) => (
                   <Grid.Col key={character.id} span={{ base: 12, md: 6 }}>
-                    <Card shadow="sm" padding="lg" radius="md" withBorder className={classes.characterCard}>
+                    <Card shadow="sm" padding="lg" radius="md" withBorder className={styles.characterCard}>
                       <Stack gap="md">
                         <Group justify="space-between" align="flex-start">
                           <Stack gap="xs">
                             <Text fw={700} size="lg">{character.name}</Text>
                             <Group gap="xs">
-                              <Badge color="blue" variant="light">
-                                Level {character.level} {character.class}
+                              <Badge variant="default">
+                                Level {character.level} {character.class} {character.ancestry}
                               </Badge>
                             </Group>
                           </Stack>
@@ -186,7 +186,7 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
                           <Text size="sm" fw={600} mb="xs">Ability Scores</Text>
                           <Group gap="xs">
                             {Object.entries(character.abilities).filter(([key]) => key !== 'breakdown').map(([ability, score]) => (
-                              <Badge key={ability} variant="outline" size="sm">
+                              <Badge key={ability} variant="default" size="sm">
                                 {ability.toUpperCase()}: {String(score)}
                               </Badge>
                             ))}
@@ -197,30 +197,27 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
                         <div>
                           <Text size="sm" fw={600} mb="xs">Key Stats</Text>
                           <Group gap="xs">
-                            <Badge color="red" variant="light">AC: {character.ac}</Badge>
-                            <Badge color="green" variant="light">HP: {character.hp}</Badge>
+                            <Badge variant="default">AC: {character.ac}</Badge>
+                            <Badge variant="default">HP: {character.hp}</Badge>
                           </Group>
                         </div>
 
-                        {/* Top Skills */}
+                        {/* Skills */}
                         <div>
                           <Text size="sm" fw={600} mb="xs">Top Skills</Text>
-                          <Group gap="xs">
+                          <Stack gap="xs">
                             {character.skills
-                              .filter(skill => skill.proficiency > 0)
-                              .sort((a, b) => b.total - a.total)
-                              .slice(0, 3)
                               .map((skill) => (
                                 <Badge 
                                   key={skill.name} 
                                   color={getProficiencyColor(skill.proficiency)}
-                                  variant="light"
+                                  variant="default"
                                   size="sm"
                                 >
                                   {skill.name}: +{skill.total}
                                 </Badge>
                               ))}
-                          </Group>
+                          </Stack>
                         </div>
 
                         {/* Spellcasting */}
@@ -231,8 +228,7 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
                               {character.spellcasting.map((casting) => (
                                 <Badge 
                                   key={casting.name} 
-                                  color="purple" 
-                                  variant="light"
+                                  variant="default"
                                   size="sm"
                                 >
                                   {casting.tradition} DC {casting.dc}

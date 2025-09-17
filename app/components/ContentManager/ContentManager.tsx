@@ -14,7 +14,6 @@ import {
   Image,
   ActionIcon,
   Modal,
-  Badge,
   Divider,
   FileInput,
   Tooltip,
@@ -43,7 +42,7 @@ import {
   isValidImageFile,
   createImagePreview
 } from '../../types/content';
-import classes from './ContentManager.module.css';
+import styles from './ContentManager.module.css';
 
 interface ContentManagerProps {
   content: ContentItem[];
@@ -210,7 +209,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
   }, [slideshowMode, content]);
 
   return (
-    <Paper p="xl" shadow="sm" className={classes.container}>
+    <Paper p="xl" shadow="sm" className={styles.container}>
       <Stack gap="xl">
         <Group justify="center">
           <IconPhoto size={32} />
@@ -308,7 +307,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
                 <Button
                   leftSection={<IconEye size={16} />}
                   onClick={() => startSlideshow(0)}
-                  variant="light"
+                  variant="default"
                 >
                   Start Slideshow ({images.length} images)
                 </Button>
@@ -320,68 +319,41 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
               <Grid>
                 {content.map((item) => (
                   <Grid.Col key={item.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
-                    <Card shadow="sm" padding="md" radius="md" withBorder className={classes.contentCard}>
+                    <Card shadow="sm" padding="md" radius="md" withBorder className={styles.contentCard}>
                       <Stack gap="sm">
                         {/* Thumbnail */}
-                        <div className={classes.thumbnailContainer}>
+                        <div className={styles.thumbnailContainer}>
                           {item.type === 'image' ? (
                             <Image
                               src={item.thumbnail || item.url}
                               alt={item.name}
                               fit="cover"
-                              className={classes.thumbnail}
+                              className={styles.thumbnail}
                               onClick={() => startSlideshow(images.findIndex(img => img.id === item.id))}
                             />
                           ) : (
                             <div 
-                              className={classes.videoThumbnail}
+                              className={styles.videoThumbnail}
                               onClick={() => setSelectedContent(item)}
                             >
                               <Image
                                 src={item.thumbnail}
                                 alt={item.name}
                                 fit="cover"
-                                className={classes.thumbnail}
+                                className={styles.thumbnail}
                               />
-                              <div className={classes.playButton}>
+                              <div className={styles.playButton}>
                                 <IconPlayerPlay size={24} />
                               </div>
                             </div>
                           )}
                         </div>
 
-                        {/* Content Info */}
-                        <div>
-                          <Text size="sm" fw={600} lineClamp={2}>
-                            {item.name}
-                          </Text>
-                          <Badge
-                            color={item.type === 'image' ? 'blue' : 'red'}
-                            variant="light"
-                            size="xs"
-                          >
-                            {item.type === 'image' ? 'Image' : 'Video'}
-                          </Badge>
-                        </div>
-
                         {/* Actions */}
                         <Group justify="space-between">
                           <ActionIcon
-                            color="blue"
-                            variant="light"
-                            onClick={() => {
-                              if (item.type === 'image') {
-                                startSlideshow(images.findIndex(img => img.id === item.id));
-                              } else {
-                                setSelectedContent(item);
-                              }
-                            }}
-                          >
-                            <IconEye size={16} />
-                          </ActionIcon>
-                          <ActionIcon
                             color="red"
-                            variant="light"
+                            variant="filled"
                             onClick={() => handleRemoveContent(item.id)}
                           >
                             <IconTrash size={16} />
@@ -410,12 +382,12 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
         size="100%"
         padding={0}
         withCloseButton={false}
-        classNames={{ content: classes.slideshowModal }}
+        classNames={{ content: styles.slideshowModal }}
       >
         {currentImage && (
-          <div className={classes.slideshowContainer}>
+          <div className={styles.slideshowContainer}>
             {/* Controls Overlay */}
-            <div className={classes.slideshowControls}>
+            <div className={styles.slideshowControls}>
               <Group justify="space-between" w="100%">
                 <Group>
                   <ActionIcon
@@ -459,7 +431,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
             </div>
 
             {/* Image Display */}
-            <div className={classes.imageContainer}>
+            <div className={styles.imageContainer}>
               <Image
                 src={currentImage.url}
                 alt={currentImage.name}
@@ -468,7 +440,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
                   transform: `scale(${zoomLevel})`,
                   transition: 'transform 0.2s ease'
                 }}
-                className={classes.slideshowImage}
+                className={styles.slideshowImage}
               />
             </div>
 
@@ -476,7 +448,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
             {images.length > 1 && (
               <>
                 <ActionIcon
-                  className={classes.navButton + ' ' + classes.navLeft}
+                  className={styles.navButton + ' ' + styles.navLeft}
                   color="white"
                   variant="subtle"
                   onClick={prevSlide}
@@ -485,7 +457,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
                   <IconChevronLeft size={32} />
                 </ActionIcon>
                 <ActionIcon
-                  className={classes.navButton + ' ' + classes.navRight}
+                  className={styles.navButton + ' ' + styles.navRight}
                   color="white"
                   variant="subtle"
                   onClick={nextSlide}
@@ -507,7 +479,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
         title={selectedContent?.name}
       >
         {selectedContent?.type === 'video' && (
-          <div className={classes.videoContainer}>
+          <div className={styles.videoContainer}>
             <iframe
               width="100%"
               height="400"

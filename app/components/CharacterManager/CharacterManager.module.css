@@ -19,20 +19,6 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
-/* Override Mantine card styles for better visibility */
-.characterCard .mantine-Card-root {
-  background: transparent !important;
-}
-
-.characterCard .mantine-Text-root {
-  color: white;
-}
-
-.characterCard .mantine-Badge-root {
-  background: rgba(255, 255, 255, 0.9);
-  color: #333;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .container {

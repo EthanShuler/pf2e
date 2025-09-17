@@ -11,13 +11,12 @@ import {
   Stack,
   Grid,
   Badge,
-  ActionIcon,
   Divider,
   ScrollArea,
 } from '@mantine/core';
 import { IconDice, IconPlus, IconMinus } from '@tabler/icons-react';
 import { ProcessedCharacter } from '../../types/character';
-import classes from './DiceRoller.module.css';
+import styles from './DiceRoller.module.css';
 
 interface DiceRoll {
   id: string;
@@ -137,7 +136,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
   };
 
   return (
-    <Paper p="xl" shadow="sm" className={classes.container}>
+    <Paper p="xl" shadow="sm" className={styles.container}>
       <Stack gap="xl">
         <Group justify="center">
           <IconDice size={32} />
@@ -190,7 +189,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
                   { value: '', label: 'Manual Roll' },
                   ...characters.map(char => ({ 
                     value: char.id, 
-                    label: `${char.name} (Level ${char.level} ${char.class})` 
+                    label: `${char.name} (Level ${char.level} ${char.class} ${char.ancestry})` 
                   }))
                 ]}
                 value={selectedCharacter}
@@ -223,7 +222,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
             onClick={handleRoll}
             loading={isRolling}
             leftSection={<IconDice size={20} />}
-            className={classes.rollButton}
+            className={styles.rollButton}
           >
             {isRolling ? 'Rolling...' : (() => {
               const effectiveModifier = getEffectiveModifier();
@@ -234,13 +233,13 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
 
         {/* Enhanced Dice Animation */}
         {isRolling && (
-          <div className={classes.diceBox}>
-            <Group justify="center" className={classes.diceContainer}>
+          <div className={styles.diceBox}>
+            <Group justify="center" className={styles.diceContainer}>
               {Array.from({ length: quantity }).map((_, index) => (
-                <div key={index} className={classes.dice} data-dice-type={selectedDice}>
-                  <div className={classes.diceInner}>
-                    <div className={classes.diceFace}>
-                      <span className={classes.diceIcon}>🎲</span>
+                <div key={index} className={styles.dice} data-dice-type={selectedDice}>
+                  <div className={styles.diceInner}>
+                    <div className={styles.diceFace}>
+                      <span className={styles.diceIcon}>🎲</span>
                     </div>
                   </div>
                 </div>
@@ -259,7 +258,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
             <ScrollArea h={300}>
               <Stack gap="sm">
                 {rollHistory.map((roll) => (
-                  <Paper key={roll.id} p="md" withBorder className={classes.historyItem}>
+                  <Paper key={roll.id} p="md" withBorder className={styles.historyItem}>
                     <Group justify="space-between" align="flex-start">
                       <Stack gap="xs">
                         <Group gap="xs">
@@ -278,7 +277,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
                             <Badge
                               key={index}
                               variant='light'
-                              color={getDiceColor(roll.diceType)}
+                              color='white'
                             >
                               {result}
                             </Badge>
@@ -296,57 +295,6 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
             </ScrollArea>
           </>
         )}
-
-        {/* Quick Roll Buttons */}
-        <Group justify="center" gap="md">
-          <Text size="sm" c="dimmed">Quick Rolls:</Text>
-          <ActionIcon
-            variant="light"
-            color="blue"
-            onClick={() => {
-              setSelectedDice('20');
-              setQuantity(1);
-              setModifier(0);
-              if (selectedCharacter) {
-                setRollType('attack');
-              }
-              handleRoll();
-            }}
-            title={selectedCharacter ? "Character Attack Roll" : "Attack Roll (d20)"}
-          >
-            ⚔️
-          </ActionIcon>
-          <ActionIcon
-            variant="light"
-            color="red"
-            onClick={() => {
-              setSelectedDice('6');
-              setQuantity(1);
-              setModifier(0);
-              setRollType('manual'); // Damage is always manual
-              handleRoll();
-            }}
-            title="Damage Roll (d6)"
-          >
-            💥
-          </ActionIcon>
-          <ActionIcon
-            variant="light"
-            color="green"
-            onClick={() => {
-              setSelectedDice('20');
-              setQuantity(1);
-              setModifier(0);
-              if (selectedCharacter) {
-                setRollType('save');
-              }
-              handleRoll();
-            }}
-            title={selectedCharacter ? "Character Saving Throw" : "Saving Throw (d20)"}
-          >
-            🛡️
-          </ActionIcon>
-        </Group>
       </Stack>
     </Paper>
   );
