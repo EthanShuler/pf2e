@@ -16,6 +16,7 @@ import {
   ScrollArea,
 } from '@mantine/core';
 import { IconDice, IconPlus, IconMinus } from '@tabler/icons-react';
+import { ProcessedCharacter } from '../../types/character';
 import classes from './DiceRoller.module.css';
 
 interface DiceRoll {
@@ -28,6 +29,10 @@ interface DiceRoll {
   timestamp: Date;
 }
 
+interface DiceRollerProps {
+  characters?: ProcessedCharacter[];
+}
+
 const DICE_TYPES = [
   { value: '4', label: 'd4' },
   { value: '6', label: 'd6' },
@@ -37,15 +42,56 @@ const DICE_TYPES = [
   { value: '20', label: 'd20' },
 ];
 
-export function DiceRoller() {
+export function DiceRoller({ characters = [] }: DiceRollerProps) {
   const [selectedDice, setSelectedDice] = useState<string>('20');
   const [quantity, setQuantity] = useState<number>(1);
   const [modifier, setModifier] = useState<number>(0);
   const [rollHistory, setRollHistory] = useState<DiceRoll[]>([]);
   const [isRolling, setIsRolling] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<string>('');
+  const [rollType, setRollType] = useState<string>('manual');
 
   const rollDice = (sides: number): number => {
     return Math.floor(Math.random() * sides) + 1;
+  };
+
+  const getAutoModifier = (): number => {
+    if (!selectedCharacter || rollType === 'manual') return 0;
+    
+    const character = characters.find(c => c.id === selectedCharacter);
+    if (!character) return 0;
+
+    switch (rollType) {
+      case 'attack':
+        // Use the best weapon proficiency available
+        const bestAttack = character.attacks.reduce((best, current) => 
+          current.total > best.total ? current : best, character.attacks[0]);
+        return bestAttack ? bestAttack.total : 0;
+      
+      case 'save':
+        // Average of all saves - in a real implementation, you'd select specific save
+        const avgSave = character.saves.reduce((sum, save) => sum + save.total, 0) / character.saves.length;
+        return Math.floor(avgSave);
+      
+      case 'skill':
+        // Use the highest skill modifier - in a real implementation, you'd select specific skill
+        const bestSkill = character.skills.reduce((best, current) => 
+          current.total > best.total ? current : best, character.skills[0]);
+        return bestSkill ? bestSkill.total : 0;
+      
+      case 'spell':
+        // Use spell attack bonus if available
+        const spellcaster = character.spellcasting.find(sc => sc.proficiency > 0);
+        return spellcaster ? spellcaster.attackBonus : 0;
+      
+      default:
+        return 0;
+    }
+  };
+
+  const getEffectiveModifier = (): number => {
+    const autoMod = getAutoModifier();
+    return rollType === 'manual' ? modifier : autoMod + modifier;
   };
 
   const handleRoll = async () => {
@@ -61,13 +107,14 @@ export function DiceRoller() {
       results.push(rollDice(diceType));
     }
     
-    const total = results.reduce((sum, result) => sum + result, 0) + modifier;
+    const effectiveModifier = getEffectiveModifier();
+    const total = results.reduce((sum, result) => sum + result, 0) + effectiveModifier;
     
     const newRoll: DiceRoll = {
       id: Date.now().toString(),
       diceType,
       quantity,
-      modifier,
+      modifier: effectiveModifier,
       results,
       total,
       timestamp: new Date(),
@@ -132,6 +179,44 @@ export function DiceRoller() {
           </Grid.Col>
         </Grid>
 
+        {/* Character Integration */}
+        {characters.length > 0 && (
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
+              <Select
+                label="Character (Optional)"
+                placeholder="Select a character for auto-modifiers"
+                data={[
+                  { value: '', label: 'Manual Roll' },
+                  ...characters.map(char => ({ 
+                    value: char.id, 
+                    label: `${char.name} (Level ${char.level} ${char.class})` 
+                  }))
+                ]}
+                value={selectedCharacter}
+                onChange={(value) => setSelectedCharacter(value || '')}
+                clearable
+              />
+            </Grid.Col>
+            
+            <Grid.Col span={{ base: 12, sm: 6 }}>
+              <Select
+                label="Roll Type"
+                data={[
+                  { value: 'manual', label: 'Manual Roll' },
+                  { value: 'attack', label: 'Attack Roll' },
+                  { value: 'save', label: 'Saving Throw' },
+                  { value: 'skill', label: 'Skill Check' },
+                  { value: 'spell', label: 'Spell Attack' },
+                ]}
+                value={rollType}
+                onChange={(value) => setRollType(value || 'manual')}
+                disabled={!selectedCharacter}
+              />
+            </Grid.Col>
+          </Grid>
+        )}
+
         <Group justify="center">
           <Button
             size="xl"
@@ -140,7 +225,10 @@ export function DiceRoller() {
             leftSection={<IconDice size={20} />}
             className={classes.rollButton}
           >
-            {isRolling ? 'Rolling...' : `Roll ${quantity}d${selectedDice}${modifier !== 0 ? (modifier > 0 ? `+${modifier}` : modifier) : ''}`}
+            {isRolling ? 'Rolling...' : (() => {
+              const effectiveModifier = getEffectiveModifier();
+              return `Roll ${quantity}d${selectedDice}${effectiveModifier !== 0 ? (effectiveModifier > 0 ? `+${effectiveModifier}` : effectiveModifier) : ''}`;
+            })()}
           </Button>
         </Group>
 
@@ -219,9 +307,12 @@ export function DiceRoller() {
               setSelectedDice('20');
               setQuantity(1);
               setModifier(0);
+              if (selectedCharacter) {
+                setRollType('attack');
+              }
               handleRoll();
             }}
-            title="Attack Roll (d20)"
+            title={selectedCharacter ? "Character Attack Roll" : "Attack Roll (d20)"}
           >
             ⚔️
           </ActionIcon>
@@ -232,6 +323,7 @@ export function DiceRoller() {
               setSelectedDice('6');
               setQuantity(1);
               setModifier(0);
+              setRollType('manual'); // Damage is always manual
               handleRoll();
             }}
             title="Damage Roll (d6)"
@@ -245,9 +337,12 @@ export function DiceRoller() {
               setSelectedDice('20');
               setQuantity(1);
               setModifier(0);
+              if (selectedCharacter) {
+                setRollType('save');
+              }
               handleRoll();
             }}
-            title="Saving Throw (d20)"
+            title={selectedCharacter ? "Character Saving Throw" : "Saving Throw (d20)"}
           >
             🛡️
           </ActionIcon>
