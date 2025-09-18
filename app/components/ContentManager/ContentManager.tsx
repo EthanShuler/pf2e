@@ -283,7 +283,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
         )}
 
         {success && (
-          <Alert color="green" title="Success" onClose={() => setSuccess(null)} withCloseButton>
+          <Alert color="limegreen" title="Success" onClose={() => setSuccess(null)} withCloseButton>
             {success}
           </Alert>
         )}
