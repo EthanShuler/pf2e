@@ -1,3 +1,8 @@
+// TODO:
+// Check skill bonuses are accurate
+// Add attack bonus, saving throws, more key info
+// Show dice rolls in UI
+
 'use client';
 
 import { useState } from 'react';
@@ -14,6 +19,7 @@ import {
   Card,
   Grid,
   Divider,
+  Box,
 } from '@mantine/core';
 import { IconUpload, IconUser, IconAlertCircle, IconCheck, IconTrash } from '@tabler/icons-react';
 import { PathbuilderCharacter, ProcessedCharacter } from '../../types/character';
@@ -94,6 +100,11 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
     const updatedCharacters = characters.filter(c => c.id !== characterId);
     onCharactersUpdate(updatedCharacters);
   };
+
+  const handleRoll = (modifier: number) => {
+    const roll = (Math.floor(Math.random() * 20) + 1) + modifier;
+    console.log(roll);
+  }
 
   const getProficiencyColor = (proficiency: number): string => {
     if (proficiency >= 8) return 'violet';
@@ -204,18 +215,24 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
 
                         {/* Skills */}
                         <div>
-                          <Text size="sm" fw={600} mb="xs">Top Skills</Text>
+                          <Text size="sm" fw={600} mb="xs">Skills</Text>
                           <Stack gap="xs">
                             {character.skills
                               .map((skill) => (
-                                <Badge 
-                                  key={skill.name} 
-                                  color={getProficiencyColor(skill.proficiency)}
-                                  variant="default"
-                                  size="sm"
-                                >
-                                  {skill.name}: +{skill.total}
+                                <Box key={skill.name} className={styles.skillsBox}>
+                                  <Badge 
+                                    color={getProficiencyColor(skill.proficiency)}
+                                    variant="default"
+                                    size="sm"
+                                    onClick={() => handleRoll(skill.total)}
+                                  >
+                                    {skill.name}: +{skill.total}
                                 </Badge>
+                                <Text>
+                                  DC: {10+skill.proficiency}
+                                </Text>
+                                </Box>
+                                
                               ))}
                           </Stack>
                         </div>

@@ -14,7 +14,7 @@ import {
   Divider,
   ScrollArea,
 } from '@mantine/core';
-import { IconDice, IconPlus, IconMinus } from '@tabler/icons-react';
+import { IconPlus, IconMinus, IconDice5 } from '@tabler/icons-react';
 import { ProcessedCharacter } from '../../types/character';
 import styles from './DiceRoller.module.css';
 
@@ -46,7 +46,6 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
   const [quantity, setQuantity] = useState<number>(1);
   const [modifier, setModifier] = useState<number>(0);
   const [rollHistory, setRollHistory] = useState<DiceRoll[]>([]);
-  const [isRolling, setIsRolling] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<string>('');
   const [rollType, setRollType] = useState<string>('manual');
 
@@ -56,33 +55,33 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
 
   const getAutoModifier = (): number => {
     if (!selectedCharacter || rollType === 'manual') return 0;
-    
+
     const character = characters.find(c => c.id === selectedCharacter);
     if (!character) return 0;
 
     switch (rollType) {
       case 'attack':
         // Use the best weapon proficiency available
-        const bestAttack = character.attacks.reduce((best, current) => 
+        const bestAttack = character.attacks.reduce((best, current) =>
           current.total > best.total ? current : best, character.attacks[0]);
         return bestAttack ? bestAttack.total : 0;
-      
+
       case 'save':
         // Average of all saves - in a real implementation, you'd select specific save
         const avgSave = character.saves.reduce((sum, save) => sum + save.total, 0) / character.saves.length;
         return Math.floor(avgSave);
-      
+
       case 'skill':
         // Use the highest skill modifier - in a real implementation, you'd select specific skill
-        const bestSkill = character.skills.reduce((best, current) => 
+        const bestSkill = character.skills.reduce((best, current) =>
           current.total > best.total ? current : best, character.skills[0]);
         return bestSkill ? bestSkill.total : 0;
-      
+
       case 'spell':
         // Use spell attack bonus if available
         const spellcaster = character.spellcasting.find(sc => sc.proficiency > 0);
         return spellcaster ? spellcaster.attackBonus : 0;
-      
+
       default:
         return 0;
     }
@@ -94,21 +93,16 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
   };
 
   const handleRoll = async () => {
-    setIsRolling(true);
-    
-    // Simulate rolling animation delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
     const diceType = parseInt(selectedDice);
     const results: number[] = [];
-    
+
     for (let i = 0; i < quantity; i++) {
       results.push(rollDice(diceType));
     }
-    
+
     const effectiveModifier = getEffectiveModifier();
     const total = results.reduce((sum, result) => sum + result, 0) + effectiveModifier;
-    
+
     const newRoll: DiceRoll = {
       id: Date.now().toString(),
       diceType,
@@ -118,9 +112,8 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
       total,
       timestamp: new Date(),
     };
-    
+
     setRollHistory(prev => [newRoll, ...prev.slice(0, 9)]);
-    setIsRolling(false);
   };
 
   const getDiceColor = (diceType: number): string => {
@@ -139,7 +132,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
     <Paper p="xl" shadow="sm" className={styles.container}>
       <Stack gap="xl">
         <Group justify="center">
-          <IconDice size={32} />
+          <IconDice5 size={32} />
           <Text size="xl" fw={700}>Pathfinder 2e Dice Roller</Text>
         </Group>
 
@@ -153,7 +146,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
               size="lg"
             />
           </Grid.Col>
-          
+
           <Grid.Col span={{ base: 12, sm: 4 }}>
             <NumberInput
               label="Quantity"
@@ -164,7 +157,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
               size="lg"
             />
           </Grid.Col>
-          
+
           <Grid.Col span={{ base: 12, sm: 4 }}>
             <NumberInput
               label="Modifier"
@@ -187,9 +180,9 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
                 placeholder="Select a character for auto-modifiers"
                 data={[
                   { value: '', label: 'Manual Roll' },
-                  ...characters.map(char => ({ 
-                    value: char.id, 
-                    label: `${char.name} (Level ${char.level} ${char.class} ${char.ancestry})` 
+                  ...characters.map(char => ({
+                    value: char.id,
+                    label: `${char.name} (Level ${char.level} ${char.class} ${char.ancestry})`
                   }))
                 ]}
                 value={selectedCharacter}
@@ -197,7 +190,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
                 clearable
               />
             </Grid.Col>
-            
+
             <Grid.Col span={{ base: 12, sm: 6 }}>
               <Select
                 label="Roll Type"
@@ -220,36 +213,12 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
           <Button
             size="xl"
             onClick={handleRoll}
-            loading={isRolling}
-            leftSection={<IconDice size={20} />}
+            leftSection={<IconDice5 size={20} />}
             className={styles.rollButton}
           >
-            {isRolling ? 'Rolling...' : (() => {
-              const effectiveModifier = getEffectiveModifier();
-              return `Roll ${quantity}d${selectedDice}${effectiveModifier !== 0 ? (effectiveModifier > 0 ? `+${effectiveModifier}` : effectiveModifier) : ''}`;
-            })()}
+            {`Roll ${quantity}d${selectedDice}${getEffectiveModifier() !== 0 ? (getEffectiveModifier() > 0 ? `+${getEffectiveModifier()}` : getEffectiveModifier()) : ''}`}
           </Button>
         </Group>
-
-        {/* Enhanced Dice Animation */}
-        {isRolling && (
-          <div className={styles.diceBox}>
-            <Group justify="center" className={styles.diceContainer}>
-              {Array.from({ length: quantity }).map((_, index) => (
-                <div key={index} className={styles.dice} data-dice-type={selectedDice}>
-                  <div className={styles.diceInner}>
-                    <div className={styles.diceFace}>
-                      <span className={styles.diceIcon}>🎲</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </Group>
-            <Text ta="center" c="white" size="lg" mt="md">
-              Rolling {quantity}d{selectedDice}...
-            </Text>
-          </div>
-        )}
 
         {/* Roll History */}
         {rollHistory.length > 0 && (
@@ -270,7 +239,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
                             {roll.quantity === 1 ? 'Result' : 'Total'}: {roll.total}
                           </Text>
                         </Group>
-                        
+
                         <Group gap="xs">
                           <Text size="sm">Individual rolls:</Text>
                           {roll.results.map((result, index) => (
@@ -284,7 +253,7 @@ export function DiceRoller({ characters = [] }: DiceRollerProps) {
                           ))}
                         </Group>
                       </Stack>
-                      
+
                       <Text size="xs" c="dimmed">
                         {roll.timestamp.toLocaleTimeString()}
                       </Text>

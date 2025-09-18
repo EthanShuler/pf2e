@@ -18,7 +18,7 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         <h1 className={styles.title}>Pathfinder 2e Game Manager</h1>
-        <p className={styles.subtitle}>Roll dice, manage your game, and track your adventures</p>
+        <p className={styles.subtitle}>Roll Dice, Manager Characters, Display Content</p>
         
         <Tabs defaultValue="dice" className={styles.tabs}>
           <Tabs.List grow>

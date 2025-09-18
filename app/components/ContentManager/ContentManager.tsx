@@ -1,3 +1,7 @@
+// TODO:
+// Add drag + Drop for slideshow order
+// Use separate page or display slideshow in new popout/window
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -51,7 +55,6 @@ interface ContentManagerProps {
 
 export function ContentManager({ content, onContentUpdate }: ContentManagerProps) {
   const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [isAddingVideo, setIsAddingVideo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
@@ -129,7 +132,6 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
     onContentUpdate([...content, videoContent]);
     setSuccess('YouTube video added successfully');
     setYoutubeUrl('');
-    setIsAddingVideo(false);
   };
 
   const handleRemoveContent = (contentId: string) => {
@@ -201,6 +203,10 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
           e.preventDefault();
           setZoomLevel(prev => Math.max(prev - 0.25, 0.25));
           break;
+        case '0':
+          e.preventDefault();
+          setZoomLevel(1);
+          break;
       }
     };
 
@@ -241,15 +247,6 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
             <Card shadow="sm" padding="lg" radius="md" withBorder>
               <Stack gap="md">
                 <Text size="lg" fw={600}>Add YouTube Video</Text>
-                {!isAddingVideo ? (
-                  <Button
-                    leftSection={<IconPlus size={16} />}
-                    onClick={() => setIsAddingVideo(true)}
-                    variant="light"
-                  >
-                    Add YouTube Video
-                  </Button>
-                ) : (
                   <Stack gap="sm">
                     <TextInput
                       label="YouTube URL"
@@ -266,7 +263,6 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
                         size="sm" 
                         variant="subtle" 
                         onClick={() => {
-                          setIsAddingVideo(false);
                           setYoutubeUrl('');
                         }}
                       >
@@ -274,7 +270,6 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
                       </Button>
                     </Group>
                   </Stack>
-                )}
               </Stack>
             </Card>
           </Grid.Col>
@@ -383,6 +378,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
         padding={0}
         withCloseButton={false}
         classNames={{ content: styles.slideshowModal }}
+        
       >
         {currentImage && (
           <div className={styles.slideshowContainer}>

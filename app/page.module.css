@@ -7,8 +7,8 @@
   --button-secondary-hover: #f2f2f2;
 
   min-height: 100vh;
-  padding: 80px;
-  gap: 64px;
+  padding: 3rem;
+  gap: 2rem;
   font-family: var(--font-geist-sans);
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
 }
@@ -27,8 +27,7 @@
 .main {
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  grid-row-start: 2;
+  gap: 2rem;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
@@ -48,7 +47,6 @@
   color: rgba(255, 255, 255, 0.8);
   text-align: center;
   margin: 0 0 2rem 0;
-  max-width: 600px;
 }
 
 .tabs {
