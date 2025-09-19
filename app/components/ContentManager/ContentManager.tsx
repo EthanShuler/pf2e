@@ -61,6 +61,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
   const [slideshowMode, setSlideshowMode] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [slideshowWindow, setSlideshowWindow] = useState<Window | null>(null);
 
   const handleImageUpload = async (files: File[] | null) => {
     if (!files || files.length === 0) return;
@@ -148,6 +149,263 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
     setZoomLevel(1);
   };
 
+  const startSlideshowInNewWindow = (startIndex: number = 0) => {
+    const images = content.filter(item => item.type === 'image') as ImageContent[];
+    if (images.length === 0) return;
+
+    // Close existing slideshow window if open
+    if (slideshowWindow && !slideshowWindow.closed) {
+      slideshowWindow.close();
+    }
+
+    // Create slideshow HTML content
+    const slideshowHTML = createSlideshowHTML(images, startIndex);
+    
+    // Open new window
+    const newWindow = window.open('', '_blank', 'width=1200,height=800,resizable=yes,scrollbars=no,menubar=no,toolbar=no');
+    
+    if (newWindow) {
+      newWindow.document.write(slideshowHTML);
+      newWindow.document.close();
+      setSlideshowWindow(newWindow);
+
+      // Handle window close
+      newWindow.addEventListener('beforeunload', () => {
+        setSlideshowWindow(null);
+      });
+    }
+  };
+
+  const createSlideshowHTML = (images: ImageContent[], startIndex: number): string => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>PF2e Content Slideshow</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 0;
+            background: black;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+          }
+          
+          .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          
+          .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+          
+          .slide.active {
+            display: block;
+          }
+          
+          .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            color: white;
+            font-size: 16px;
+          }
+          
+          .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            z-index: 100;
+            transition: background 0.2s;
+          }
+          
+          .nav-button:hover {
+            background: rgba(255, 255, 255, 0.4);
+          }
+          
+          .nav-button.prev {
+            left: 20px;
+          }
+          
+          .nav-button.next {
+            right: 20px;
+          }
+          
+          .zoom-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+          }
+          
+          .zoom-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+          }
+          
+          .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+          }
+          
+          .image-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="slideshow-container">
+          <div class="controls">
+            <div class="slide-counter">
+              <span id="current-slide">1</span> / <span id="total-slides">${images.length}</span>
+            </div>
+            <div class="zoom-controls">
+              <button class="zoom-btn" onclick="zoomOut()">-</button>
+              <span id="zoom-level">100%</span>
+              <button class="zoom-btn" onclick="zoomIn()">+</button>
+              <button class="zoom-btn" onclick="resetZoom()">Reset</button>
+            </div>
+          </div>
+          
+          <div class="image-container">
+            ${images.map((img, index) => `
+              <img 
+                class="slide ${index === startIndex ? 'active' : ''}" 
+                src="${img.url}" 
+                alt="${img.name}"
+                id="slide-${index}"
+              />
+            `).join('')}
+          </div>
+          
+          ${images.length > 1 ? `
+            <button class="nav-button prev" onclick="prevSlide()">‹</button>
+            <button class="nav-button next" onclick="nextSlide()">›</button>
+          ` : ''}
+        </div>
+        
+        <script>
+          let currentIndex = ${startIndex};
+          let zoomLevel = 1;
+          const totalSlides = ${images.length};
+          
+          function showSlide(index) {
+            document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+            const slide = document.getElementById('slide-' + index);
+            if (slide) {
+              slide.classList.add('active');
+              slide.style.transform = 'scale(' + zoomLevel + ')';
+            }
+            document.getElementById('current-slide').textContent = index + 1;
+          }
+          
+          function nextSlide() {
+            currentIndex = (currentIndex + 1) % totalSlides;
+            zoomLevel = 1;
+            updateZoomDisplay();
+            showSlide(currentIndex);
+          }
+          
+          function prevSlide() {
+            currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+            zoomLevel = 1;
+            updateZoomDisplay();
+            showSlide(currentIndex);
+          }
+          
+          function zoomIn() {
+            zoomLevel = Math.min(zoomLevel + 0.25, 3);
+            updateZoomDisplay();
+            showSlide(currentIndex);
+          }
+          
+          function zoomOut() {
+            zoomLevel = Math.max(zoomLevel - 0.25, 0.25);
+            updateZoomDisplay();
+            showSlide(currentIndex);
+          }
+          
+          function resetZoom() {
+            zoomLevel = 1;
+            updateZoomDisplay();
+            showSlide(currentIndex);
+          }
+          
+          function updateZoomDisplay() {
+            document.getElementById('zoom-level').textContent = Math.round(zoomLevel * 100) + '%';
+          }
+          
+          // Keyboard navigation
+          document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+              case 'ArrowLeft':
+                e.preventDefault();
+                prevSlide();
+                break;
+              case 'ArrowRight':
+                e.preventDefault();
+                nextSlide();
+                break;
+              case 'Escape':
+                e.preventDefault();
+                window.close();
+                break;
+              case '+':
+              case '=':
+                e.preventDefault();
+                zoomIn();
+                break;
+              case '-':
+                e.preventDefault();
+                zoomOut();
+                break;
+              case '0':
+                e.preventDefault();
+                resetZoom();
+                break;
+            }
+          });
+          
+          // Initialize
+          updateZoomDisplay();
+          showSlide(currentIndex);
+        </script>
+      </body>
+      </html>
+    `;
+  };
+
   const nextSlide = () => {
     const images = content.filter(item => item.type === 'image');
     setCurrentSlideIndex((prev) => (prev + 1) % images.length);
@@ -213,6 +471,15 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [slideshowMode, content]);
+
+  // Cleanup slideshow window on component unmount
+  useEffect(() => {
+    return () => {
+      if (slideshowWindow && !slideshowWindow.closed) {
+        slideshowWindow.close();
+      }
+    };
+  }, [slideshowWindow]);
 
   return (
     <Paper p="xl" shadow="sm" className={styles.container}>
@@ -306,6 +573,13 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
                 >
                   Start Slideshow ({images.length} images)
                 </Button>
+                <Button
+                  leftSection={<IconPlus size={16} />}
+                  onClick={() => startSlideshowInNewWindow(0)}
+                  variant="outline"
+                >
+                  Open in New Window
+                </Button>
               </Group>
             )}
 
@@ -325,6 +599,11 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
                               fit="cover"
                               className={styles.thumbnail}
                               onClick={() => startSlideshow(images.findIndex(img => img.id === item.id))}
+                              onContextMenu={(e) => {
+                                e.preventDefault();
+                                startSlideshowInNewWindow(images.findIndex(img => img.id === item.id));
+                              }}
+                              title="Click to view in slideshow, right-click to open in new window"
                             />
                           ) : (
                             <div 

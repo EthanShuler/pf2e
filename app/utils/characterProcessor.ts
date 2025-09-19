@@ -27,7 +27,8 @@ export function processPathbuilderCharacter(pathbuilderData: PathbuilderCharacte
   const skills: SkillData[] = Object.entries(SKILL_ABILITIES).map(([skillName, abilityKey]) => {
     const proficiency = build.proficiencies[skillName as keyof typeof build.proficiencies] as number;
     const abilityMod = abilityMods[abilityKey as keyof typeof abilityMods];
-    const profBonus = proficiency + build.level;
+    // Untrained (0) doesn't add level, trained and above do
+    const profBonus = proficiency === 0 ? 0 : proficiency + build.level;
     const total = abilityMod + profBonus;
 
     return {
@@ -44,7 +45,8 @@ export function processPathbuilderCharacter(pathbuilderData: PathbuilderCharacte
   const saves: SaveData[] = Object.entries(SAVE_ABILITIES).map(([saveName, abilityKey]) => {
     const proficiency = build.proficiencies[saveName as keyof typeof build.proficiencies] as number;
     const abilityMod = abilityMods[abilityKey as keyof typeof abilityMods];
-    const profBonus = proficiency + build.level;
+    // Untrained (0) doesn't add level, trained and above do
+    const profBonus = proficiency === 0 ? 0 : proficiency + build.level;
     const total = abilityMod + profBonus;
 
     return {
@@ -62,22 +64,22 @@ export function processPathbuilderCharacter(pathbuilderData: PathbuilderCharacte
     {
       name: 'Simple Weapons',
       proficiency: build.proficiencies.simple,
-      total: abilityMods.str + build.proficiencies.simple + build.level,
+      total: abilityMods.str + (build.proficiencies.simple === 0 ? 0 : build.proficiencies.simple + build.level),
     },
     {
       name: 'Martial Weapons', 
       proficiency: build.proficiencies.martial,
-      total: abilityMods.str + build.proficiencies.martial + build.level,
+      total: abilityMods.str + (build.proficiencies.martial === 0 ? 0 : build.proficiencies.martial + build.level),
     },
     {
       name: 'Advanced Weapons',
       proficiency: build.proficiencies.advanced,
-      total: abilityMods.str + build.proficiencies.advanced + build.level,
+      total: abilityMods.str + (build.proficiencies.advanced === 0 ? 0 : build.proficiencies.advanced + build.level),
     },
     {
       name: 'Unarmed',
       proficiency: build.proficiencies.unarmed,
-      total: abilityMods.str + build.proficiencies.unarmed + build.level,
+      total: abilityMods.str + (build.proficiencies.unarmed === 0 ? 0 : build.proficiencies.unarmed + build.level),
     },
   ].filter(attack => attack.proficiency > 0);
 
@@ -85,7 +87,8 @@ export function processPathbuilderCharacter(pathbuilderData: PathbuilderCharacte
   const spellcasting: SpellcastingData[] = build.spellCasters.map(caster => {
     const abilityKey = caster.ability as keyof typeof abilityMods;
     const abilityMod = abilityMods[abilityKey];
-    const profBonus = caster.proficiency + build.level;
+    // Untrained (0) doesn't add level, trained and above do
+    const profBonus = caster.proficiency === 0 ? 0 : caster.proficiency + build.level;
     const dc = 10 + abilityMod + profBonus;
     const attackBonus = abilityMod + profBonus;
 
@@ -130,7 +133,8 @@ export function calculateDC(characterId: string, rollType: string, characters: P
   if (rollType === 'class') {
     const keyAbility = character.abilities[character.proficiencies.classDC === 8 ? 'con' : 'str']; // This is simplified
     const abilityMod = getAbilityModifier(keyAbility);
-    return 10 + abilityMod + character.proficiencies.classDC + character.level;
+    const profBonus = character.proficiencies.classDC === 0 ? 0 : character.proficiencies.classDC + character.level;
+    return 10 + abilityMod + profBonus;
   }
 
   // Spell DC

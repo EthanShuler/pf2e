@@ -1,5 +1,4 @@
 // TODO:
-// Check skill bonuses are accurate
 // Add attack bonus, saving throws, more key info
 // Show dice rolls in UI
 
@@ -226,8 +225,8 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
                                     size="sm"
                                     onClick={() => handleRoll(skill.total)}
                                   >
-                                    {skill.name}: +{skill.total}
-                                </Badge>
+                                    {skill.name}: {skill.total > 0 && '+'}{skill.total}
+                                  </Badge>
                                 <Text>
                                   DC: {10+skill.proficiency}
                                 </Text>
