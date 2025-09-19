@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { DiceRoller } from './components/DiceRoller/DiceRoller';
 import { CharacterManager } from './components/CharacterManager/CharacterManager';
 import { ContentManager } from './components/ContentManager/ContentManager';
-import { ProcessedCharacter } from './types/character';
-import { ContentItem } from './types/content';
+import { SettingsManager } from './components/SettingsManager/SettingsManager';
+import { useCharacters } from './hooks/useCharacters';
+import { useContent } from './hooks/useContent';
 import { Tabs } from '@mantine/core';
-import { IconDice5, IconUser, IconPhoto } from '@tabler/icons-react';
+import { IconDice5, IconUser, IconPhoto, IconSettings } from '@tabler/icons-react';
 import styles from "./page.module.css";
 
 export default function Home() {
-  const [characters, setCharacters] = useState<ProcessedCharacter[]>([]);
-  const [content, setContent] = useState<ContentItem[]>([]);
+  const { characters } = useCharacters();
+  const { content } = useContent();
 
   return (
     <div className={styles.page}>
@@ -30,6 +30,9 @@ export default function Home() {
             <Tabs.Tab value="content" leftSection={<IconPhoto size={16} />}>
               Content ({content.length})
             </Tabs.Tab>
+            <Tabs.Tab value="settings" leftSection={<IconSettings size={16} />}>
+              Settings
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="dice" pt="md">
@@ -37,17 +40,15 @@ export default function Home() {
           </Tabs.Panel>
 
           <Tabs.Panel value="characters" pt="md">
-            <CharacterManager 
-              characters={characters} 
-              onCharactersUpdate={setCharacters}
-            />
+            <CharacterManager />
           </Tabs.Panel>
 
           <Tabs.Panel value="content" pt="md">
-            <ContentManager 
-              content={content} 
-              onContentUpdate={setContent}
-            />
+            <ContentManager />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="settings" pt="md">
+            <SettingsManager />
           </Tabs.Panel>
         </Tabs>
       </main>

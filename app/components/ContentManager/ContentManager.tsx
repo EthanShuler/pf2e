@@ -42,14 +42,11 @@ import {
   isValidImageFile,
   createImagePreview
 } from '../../types/content';
+import { useContent } from '../../hooks/useContent';
+import { useUserPreferences } from '../../hooks/useUserPreferences';
 import styles from './ContentManager.module.css';
 
-interface ContentManagerProps {
-  content: ContentItem[];
-  onContentUpdate: (content: ContentItem[]) => void;
-}
-
-export function ContentManager({ content, onContentUpdate }: ContentManagerProps) {
+export function ContentManager() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -58,6 +55,9 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [slideshowWindow, setSlideshowWindow] = useState<Window | null>(null);
+
+  const { content, addContent, addMultipleContent, removeContent, getImageContent, getVideoContent } = useContent();
+  const { preferences } = useUserPreferences();
 
   const handleImageUpload = async (files: File[] | null) => {
     if (!files || files.length === 0) return;
@@ -89,7 +89,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
       }
 
       if (newImages.length > 0) {
-        onContentUpdate([...content, ...newImages]);
+        addMultipleContent(newImages);
         setSuccess(`Successfully uploaded ${newImages.length} image(s)`);
       }
     } catch (err) {
@@ -126,18 +126,17 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
       loop: true,
     };
 
-    onContentUpdate([...content, videoContent]);
+    addContent(videoContent);
     setSuccess('YouTube video added successfully');
     setYoutubeUrl('');
   };
 
   const handleRemoveContent = (contentId: string) => {
-    const updatedContent = content.filter(item => item.id !== contentId);
-    onContentUpdate(updatedContent);
+    removeContent(contentId);
   };
 
   const startSlideshow = (startIndex: number = 0) => {
-    const images = content.filter(item => item.type === 'image');
+    const images = getImageContent();
     if (images.length === 0) return;
 
     setSlideshowMode(true);
@@ -146,7 +145,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
   };
 
   const startSlideshowInNewWindow = (startIndex: number = 0) => {
-    const images = content.filter(item => item.type === 'image') as ImageContent[];
+    const images = getImageContent();
     if (images.length === 0) return;
 
     // Close existing slideshow window if open
@@ -403,13 +402,13 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
   };
 
   const nextSlide = () => {
-    const images = content.filter(item => item.type === 'image');
+    const images = getImageContent();
     setCurrentSlideIndex((prev) => (prev + 1) % images.length);
     setZoomLevel(1);
   };
 
   const prevSlide = () => {
-    const images = content.filter(item => item.type === 'image');
+    const images = getImageContent();
     setCurrentSlideIndex((prev) => (prev - 1 + images.length) % images.length);
     setZoomLevel(1);
   };
@@ -422,8 +421,8 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
     setZoomLevel(prev => Math.max(prev - 0.25, 0.25));
   };
 
-  const images = content.filter(item => item.type === 'image');
-  const videos = content.filter(item => item.type === 'video');
+  const images = getImageContent();
+  const videos = getVideoContent();
   const currentImage = images[currentSlideIndex];
 
   // Keyboard navigation for slideshow
@@ -431,7 +430,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
     if (!slideshowMode) return;
 
     const handleKeyPress = (e: KeyboardEvent) => {
-      const images = content.filter(item => item.type === 'image');
+      const images = getImageContent();
       
       switch (e.key) {
         case 'ArrowLeft':
@@ -466,7 +465,7 @@ export function ContentManager({ content, onContentUpdate }: ContentManagerProps
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [slideshowMode, content]);
+  }, [slideshowMode, getImageContent]);
 
   // Cleanup slideshow window on component unmount
   useEffect(() => {

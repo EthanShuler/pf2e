@@ -2,7 +2,7 @@
 
 ## Overall
 - Light/dark mode toggle
-- Store characters and content in db or localstorage
+- Add image URLs instead of local upload
 - Add GM Notes section
 
 ## Content Manager

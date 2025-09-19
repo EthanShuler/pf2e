@@ -20,18 +20,18 @@ import { notifications } from '@mantine/notifications';
 import { IconUpload, IconUser, IconAlertCircle, IconCheck, IconTrash, IconDice } from '@tabler/icons-react';
 import { PathbuilderCharacter, ProcessedCharacter } from '../../types/character';
 import { processPathbuilderCharacter } from '../../utils/characterProcessor';
+import { useCharacters } from '../../hooks/useCharacters';
+import { useUserPreferences } from '../../hooks/useUserPreferences';
 import styles from './CharacterManager.module.css';
 
-interface CharacterManagerProps {
-  characters: ProcessedCharacter[];
-  onCharactersUpdate: (characters: ProcessedCharacter[]) => void;
-}
-
-export function CharacterManager({ characters, onCharactersUpdate }: CharacterManagerProps) {
+export function CharacterManager() {
   const [importText, setImportText] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
+
+  const { characters, addCharacter, removeCharacter } = useCharacters();
+  const { preferences } = useUserPreferences();
 
   const handleImport = async () => {
     if (!importText.trim()) {
@@ -81,7 +81,8 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
       if (newCharacters.length === 0) {
         setImportError('No new characters found (duplicates skipped)');
       } else {
-        onCharactersUpdate([...characters, ...newCharacters]);
+        // Use addCharacter for each new character
+        newCharacters.forEach(character => addCharacter(character));
         setImportSuccess(`Successfully imported ${newCharacters.length} character(s): ${newCharacters.map(c => c.name).join(', ')}`);
         setImportText('');
       }
@@ -93,8 +94,7 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
   };
 
   const handleRemoveCharacter = (characterId: string) => {
-    const updatedCharacters = characters.filter(c => c.id !== characterId);
-    onCharactersUpdate(updatedCharacters);
+    removeCharacter(characterId);
   };
 
   const handleRoll = (modifier: number, skillName: string, characterName: string) => {
@@ -108,10 +108,10 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
     let color = 'blue';
     let title = `${characterName} - ${skillName}`;
     
-    if (isCritSuccess) {
+    if (isCritSuccess && preferences.diceRolls.showCriticals) {
       color = 'green';
       title += ' NAT 20';
-    } else if (isCritFailure) {
+    } else if (isCritFailure && preferences.diceRolls.showCriticals) {
       color = 'red';
       title += ' NAT 1';
     }
@@ -128,7 +128,7 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
             <Text span fw={700} c={d20Roll === 20 ? 'green' : d20Roll === 1 ? 'red' : undefined} size="lg">
               {d20Roll}
             </Text>
-            {modifier !== 0 && (
+            {modifier !== 0 && preferences.diceRolls.showBreakdown && (
               <>
                 <Text span size="sm"> + </Text>
                 <Text span fw={600} size="md">{modifier}</Text>
@@ -142,10 +142,11 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
         </Group>
       ),
       color,
-      autoClose: isCritSuccess || isCritFailure ? 6000 : 4000,
+      autoClose: preferences.notifications.duration,
       withCloseButton: true,
       withBorder: true,
       radius: 'md',
+      position: preferences.notifications.position,
     });
   };
 
