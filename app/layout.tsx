@@ -7,8 +7,8 @@ import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
 import { Providers } from './providers';
 
 export const metadata = {
-  title: 'My Mantine app',
-  description: 'I have followed setup instructions carefully',
+  title: 'Pathmanager 2e',
+  description: 'Manage a Pathfinder 2e game',
 };
 
 export default function RootLayout({
