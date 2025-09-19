@@ -193,8 +193,6 @@ export function CharacterManager() {
                 {importSuccess}
               </Alert>
             )}
-
-            <Group>
               <Button
                 leftSection={<IconUpload size={16} />}
                 onClick={handleImport}
@@ -203,14 +201,6 @@ export function CharacterManager() {
               >
                 Import Character(s)
               </Button>
-              <Button
-                leftSection={<IconDice size={16} />}
-                onClick={() => handleRoll(5, 'Test Skill', 'Test Character')}
-                variant="outline"
-              >
-                Test Dice Roll
-              </Button>
-            </Group>
           </Stack>
         </Card>
 
@@ -236,7 +226,7 @@ export function CharacterManager() {
                           <Button
                             size="xs"
                             color="red"
-                            variant="subtle"
+                            variant="filled"
                             onClick={() => handleRemoveCharacter(character.id)}
                           >
                             <IconTrash size={14} />

@@ -1,6 +1,6 @@
 'use client';
 
-import { DiceRoller } from './components/DiceRoller/DiceRoller';
+import { FloatingDiceRoller } from './components/DiceRoller/FloatingDiceRoller';
 import { CharacterManager } from './components/CharacterManager/CharacterManager';
 import { ContentManager } from './components/ContentManager/ContentManager';
 import { SettingsManager } from './components/SettingsManager/SettingsManager';
@@ -9,7 +9,7 @@ import { useCharacters } from './hooks/useCharacters';
 import { useContent } from './hooks/useContent';
 import { useGMNotes } from './hooks/useGMNotes';
 import { Tabs } from '@mantine/core';
-import { IconDice5, IconUser, IconPhoto, IconSettings, IconNotes } from '@tabler/icons-react';
+import { IconUser, IconPhoto, IconSettings, IconNotes } from '@tabler/icons-react';
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -22,11 +22,8 @@ export default function Home() {
       <main className={styles.main}>
         <h1 className={styles.title}>Pathfinder 2e Game Manager</h1>
         
-        <Tabs defaultValue="dice" className={styles.tabs}>
+        <Tabs defaultValue="characters" className={styles.tabs}>
           <Tabs.List grow>
-            <Tabs.Tab value="dice" leftSection={<IconDice5 size={16} />}>
-              Dice Roller
-            </Tabs.Tab>
             <Tabs.Tab value="characters" leftSection={<IconUser size={16} />}>
               Characters ({characters.length})
             </Tabs.Tab>
@@ -40,10 +37,6 @@ export default function Home() {
               Settings
             </Tabs.Tab>
           </Tabs.List>
-
-          <Tabs.Panel value="dice" pt="md">
-            <DiceRoller characters={characters} />
-          </Tabs.Panel>
 
           <Tabs.Panel value="characters" pt="md">
             <CharacterManager />
@@ -61,6 +54,9 @@ export default function Home() {
             <SettingsManager />
           </Tabs.Panel>
         </Tabs>
+
+        {/* Floating Dice Roller */}
+        <FloatingDiceRoller />
       </main>
     </div>
   );

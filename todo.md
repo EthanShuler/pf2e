@@ -2,7 +2,6 @@
 
 ## Overall
 - Light/dark mode toggle
-- Add GM Notes section
 
 ## Content Manager
 - Add drag + Drop for slideshow order
