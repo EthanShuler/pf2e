@@ -32,6 +32,7 @@ import { notifications } from '@mantine/notifications';
 import { useUserPreferences, UserPreferences } from '../../hooks/useUserPreferences';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useContent } from '../../hooks/useContent';
+import { useGMNotes, GMNote } from '../../hooks/useGMNotes';
 import { ProcessedCharacter } from '../../types/character';
 import { ContentItem } from '../../types/content';
 
@@ -41,6 +42,7 @@ interface ExportData {
   characters: ProcessedCharacter[];
   content: ContentItem[];
   preferences: UserPreferences;
+  gmNotes: GMNote[];
 }
 
 export function SettingsManager() {
@@ -59,6 +61,7 @@ export function SettingsManager() {
 
   const { characters, clearAllCharacters } = useCharacters();
   const { content, clearAllContent } = useContent();
+  const { notes: gmNotes, clearAllNotes } = useGMNotes();
 
   const generateExportData = (): ExportData => {
     return {
@@ -67,6 +70,7 @@ export function SettingsManager() {
       characters,
       content,
       preferences,
+      gmNotes,
     };
   };
 
@@ -141,6 +145,7 @@ export function SettingsManager() {
   const handleClearAllData = () => {
     clearAllCharacters();
     clearAllContent();
+    clearAllNotes();
     resetToDefaults();
     setClearDataModalOpen(false);
     
@@ -261,6 +266,9 @@ export function SettingsManager() {
             </Badge>
             <Badge variant="light">
               Content: {content.length}
+            </Badge>
+            <Badge variant="light">
+              GM Notes: {gmNotes.length}
             </Badge>
             <Badge variant="light">
               Used: {storageInfo.used} KB

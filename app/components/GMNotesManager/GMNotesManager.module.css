@@ -1,0 +1,63 @@
+.container {
+  max-width: 100%;
+}
+
+.noteCard {
+  transition: background-color 0.2s ease;
+  border: 1px solid var(--mantine-color-gray-3);
+}
+
+.noteCard:hover {
+  background-color: var(--mantine-color-gray-0);
+}
+
+.selectedNote {
+  background-color: var(--mantine-color-blue-0);
+  border-color: var(--mantine-color-blue-3);
+}
+
+.editorContainer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.richTextEditor {
+  flex: 1;
+  min-height: 400px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1rem;
+}
+
+.notesList {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.noteMetadata {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .notesList {
+    max-height: 300px;
+  }
+  
+  .richTextEditor {
+    min-height: 300px;
+  }
+}

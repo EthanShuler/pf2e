@@ -2,7 +2,6 @@
 
 ## Overall
 - Light/dark mode toggle
-- Add image URLs instead of local upload
 - Add GM Notes section
 
 ## Content Manager
