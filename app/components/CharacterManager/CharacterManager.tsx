@@ -18,7 +18,7 @@ import {
   Card,
   Grid,
   Divider,
-  Box,
+  Tooltip,
 } from '@mantine/core';
 import { IconUpload, IconUser, IconAlertCircle, IconCheck, IconTrash } from '@tabler/icons-react';
 import { PathbuilderCharacter, ProcessedCharacter } from '../../types/character';
@@ -215,25 +215,27 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
                         {/* Skills */}
                         <div>
                           <Text size="sm" fw={600} mb="xs">Skills</Text>
-                          <Stack gap="xs">
+                          <Group gap="xs">
                             {character.skills
                               .map((skill) => (
-                                <Box key={skill.name} className={styles.skillsBox}>
+                                <Tooltip
+                                  key={skill.name}
+                                  label={`DC: ${10 + skill.total} | ${skill.ability} ${skill.abilityMod > 0 ? '+' : ''}${skill.abilityMod} + Prof ${skill.profBonus}`}
+                                  withArrow
+                                  position="top"
+                                >
                                   <Badge 
                                     color={getProficiencyColor(skill.proficiency)}
                                     variant="default"
                                     size="sm"
                                     onClick={() => handleRoll(skill.total)}
+                                    style={{ cursor: 'pointer' }}
                                   >
                                     {skill.name}: {skill.total > 0 && '+'}{skill.total}
                                   </Badge>
-                                <Text>
-                                  DC: {10+skill.proficiency}
-                                </Text>
-                                </Box>
-                                
+                                </Tooltip>
                               ))}
-                          </Stack>
+                          </Group>
                         </div>
 
                         {/* Spellcasting */}

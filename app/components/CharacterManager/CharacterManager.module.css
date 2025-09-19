@@ -19,12 +19,6 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
-.skillsBox {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .container {
