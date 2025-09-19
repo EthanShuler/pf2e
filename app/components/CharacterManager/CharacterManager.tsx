@@ -1,6 +1,7 @@
 // TODO:
-// Add attack bonus, saving throws, more key info
-// Show dice rolls in UI
+// Add more key info (initiative, perception, etc.)
+// Add damage rolls for weapons
+// Add spell save DC tooltips
 
 'use client';
 
@@ -20,7 +21,8 @@ import {
   Divider,
   Tooltip,
 } from '@mantine/core';
-import { IconUpload, IconUser, IconAlertCircle, IconCheck, IconTrash } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
+import { IconUpload, IconUser, IconAlertCircle, IconCheck, IconTrash, IconDice } from '@tabler/icons-react';
 import { PathbuilderCharacter, ProcessedCharacter } from '../../types/character';
 import { processPathbuilderCharacter } from '../../utils/characterProcessor';
 import styles from './CharacterManager.module.css';
@@ -100,10 +102,57 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
     onCharactersUpdate(updatedCharacters);
   };
 
-  const handleRoll = (modifier: number) => {
-    const roll = (Math.floor(Math.random() * 20) + 1) + modifier;
-    console.log(roll);
-  }
+  const handleRoll = (modifier: number, skillName: string, characterName: string) => {
+    const d20Roll = Math.floor(Math.random() * 20) + 1;
+    const total = d20Roll + modifier;
+    
+    // Determine if it's a critical success/failure
+    const isCritSuccess = d20Roll === 20;
+    const isCritFailure = d20Roll === 1;
+    
+    let color = 'blue';
+    let title = `${characterName} - ${skillName}`;
+    
+    if (isCritSuccess) {
+      color = 'green';
+      title += ' NAT 20';
+    } else if (isCritFailure) {
+      color = 'red';
+      title += ' NAT 1';
+    }
+    
+    notifications.show({
+      id: `roll-${Date.now()}`,
+      title,
+      message: (
+        <Group gap="xs" align="center">
+          <IconDice size={20} />
+          <Text size="sm">
+            <Text span fw={700} size="lg">🎲</Text>
+            {' '}
+            <Text span fw={700} c={d20Roll === 20 ? 'green' : d20Roll === 1 ? 'red' : undefined} size="lg">
+              {d20Roll}
+            </Text>
+            {modifier !== 0 && (
+              <>
+                <Text span size="sm"> + </Text>
+                <Text span fw={600} size="md">{modifier}</Text>
+              </>
+            )}
+            <Text span size="sm"> = </Text>
+            <Text span fw={700} size="xl" c={isCritSuccess ? 'green' : isCritFailure ? 'red' : 'blue'}>
+              {total}
+            </Text>
+          </Text>
+        </Group>
+      ),
+      color,
+      autoClose: isCritSuccess || isCritFailure ? 6000 : 4000,
+      withCloseButton: true,
+      withBorder: true,
+      radius: 'md',
+    });
+  };
 
   const getProficiencyColor = (proficiency: number): string => {
     if (proficiency >= 8) return 'violet';
@@ -157,6 +206,13 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
                 disabled={!importText.trim()}
               >
                 Import Character(s)
+              </Button>
+              <Button
+                leftSection={<IconDice size={16} />}
+                onClick={() => handleRoll(5, 'Test Skill', 'Test Character')}
+                variant="outline"
+              >
+                Test Dice Roll
               </Button>
             </Group>
           </Stack>
@@ -212,6 +268,68 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
                           </Group>
                         </div>
 
+                        {/* Saving Throws */}
+                        <div>
+                          <Text size="sm" fw={600} mb="xs">Saving Throws</Text>
+                          <Group gap="xs">
+                            {character.saves.map((save) => (
+                              <Tooltip
+                                key={save.name}
+                                label={`DC: ${10 + save.total} | ${save.ability} ${save.abilityMod > 0 ? '+' : ''}${save.abilityMod} + Prof ${save.profBonus}`}
+                                withArrow
+                                position="top"
+                                events={{ hover: true, focus: false, touch: false }}
+                              >
+                                <Badge 
+                                  color={getProficiencyColor(save.proficiency)}
+                                  variant="default"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleRoll(save.total, save.name, character.name);
+                                  }}
+                                  style={{ cursor: 'pointer' }}
+                                >
+                                  {save.name}: {save.total > 0 && '+'}{save.total}
+                                </Badge>
+                              </Tooltip>
+                            ))}
+                          </Group>
+                        </div>
+
+                        {/* Attacks */}
+                        {character.attacks.length > 0 && (
+                          <div>
+                            <Text size="sm" fw={600} mb="xs">Attack Bonuses</Text>
+                            <Group gap="xs">
+                              {character.attacks.map((attack) => (
+                                <Tooltip
+                                  key={attack.name}
+                                  label={`Attack Roll: d20 + ${attack.total}`}
+                                  withArrow
+                                  position="top"
+                                  events={{ hover: true, focus: false, touch: false }}
+                                >
+                                  <Badge 
+                                    color={getProficiencyColor(attack.proficiency)}
+                                    variant="default"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleRoll(attack.total, `${attack.name} Attack`, character.name);
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                  >
+                                    {attack.name}: {attack.total > 0 && '+'}{attack.total}
+                                  </Badge>
+                                </Tooltip>
+                              ))}
+                            </Group>
+                          </div>
+                        )}
+
                         {/* Skills */}
                         <div>
                           <Text size="sm" fw={600} mb="xs">Skills</Text>
@@ -223,12 +341,17 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
                                   label={`DC: ${10 + skill.total} | ${skill.ability} ${skill.abilityMod > 0 ? '+' : ''}${skill.abilityMod} + Prof ${skill.profBonus}`}
                                   withArrow
                                   position="top"
+                                  events={{ hover: true, focus: false, touch: false }}
                                 >
                                   <Badge 
                                     color={getProficiencyColor(skill.proficiency)}
                                     variant="default"
                                     size="sm"
-                                    onClick={() => handleRoll(skill.total)}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleRoll(skill.total, skill.name, character.name);
+                                    }}
                                     style={{ cursor: 'pointer' }}
                                   >
                                     {skill.name}: {skill.total > 0 && '+'}{skill.total}
@@ -244,13 +367,26 @@ export function CharacterManager({ characters, onCharactersUpdate }: CharacterMa
                             <Text size="sm" fw={600} mb="xs">Spellcasting</Text>
                             <Group gap="xs">
                               {character.spellcasting.map((casting) => (
-                                <Badge 
-                                  key={casting.name} 
-                                  variant="default"
-                                  size="sm"
+                                <Tooltip
+                                  key={casting.name}
+                                  label={`Spell Attack: d20 + ${casting.attackBonus} | Save DC: ${casting.dc}`}
+                                  withArrow
+                                  position="top"
+                                  events={{ hover: true, focus: false, touch: false }}
                                 >
-                                  {casting.tradition} DC {casting.dc}
-                                </Badge>
+                                  <Badge 
+                                    variant="default"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleRoll(casting.attackBonus, `${casting.tradition} Spell Attack`, character.name);
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                  >
+                                    {casting.tradition} DC {casting.dc}
+                                  </Badge>
+                                </Tooltip>
                               ))}
                             </Group>
                           </div>
