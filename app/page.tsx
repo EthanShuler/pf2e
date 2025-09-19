@@ -7,7 +7,7 @@ import { ContentManager } from './components/ContentManager/ContentManager';
 import { ProcessedCharacter } from './types/character';
 import { ContentItem } from './types/content';
 import { Tabs } from '@mantine/core';
-import { IconDice, IconUser, IconPhoto } from '@tabler/icons-react';
+import { IconDice5, IconUser, IconPhoto } from '@tabler/icons-react';
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -18,11 +18,10 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         <h1 className={styles.title}>Pathfinder 2e Game Manager</h1>
-        <p className={styles.subtitle}>Roll Dice, Manager Characters, Display Content</p>
         
         <Tabs defaultValue="dice" className={styles.tabs}>
           <Tabs.List grow>
-            <Tabs.Tab value="dice" leftSection={<IconDice size={16} />}>
+            <Tabs.Tab value="dice" leftSection={<IconDice5 size={16} />}>
               Dice Roller
             </Tabs.Tab>
             <Tabs.Tab value="characters" leftSection={<IconUser size={16} />}>

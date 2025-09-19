@@ -1,7 +1,3 @@
-// TODO:
-// Add drag + Drop for slideshow order
-// Use separate page or display slideshow in new popout/window
-
 'use client';
 
 import { useState, useEffect } from 'react';

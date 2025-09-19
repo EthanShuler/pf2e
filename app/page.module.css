@@ -29,7 +29,6 @@
   flex-direction: column;
   gap: 2rem;
   align-items: center;
-  justify-content: center;
   min-height: 100vh;
 }
 
@@ -40,13 +39,6 @@
   text-align: center;
   margin: 0;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.subtitle {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  margin: 0 0 2rem 0;
 }
 
 .tabs {
@@ -60,10 +52,6 @@
   
   .title {
     font-size: 2rem;
-  }
-  
-  .subtitle {
-    font-size: 1rem;
   }
 }
 

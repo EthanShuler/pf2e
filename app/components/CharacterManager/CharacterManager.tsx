@@ -1,8 +1,3 @@
-// TODO:
-// Add more key info (initiative, perception, etc.)
-// Add damage rolls for weapons
-// Add spell save DC tooltips
-
 'use client';
 
 import { useState } from 'react';
