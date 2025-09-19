@@ -31,7 +31,8 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconX,
-  IconPlus
+  IconPlus,
+  IconLink
 } from '@tabler/icons-react';
 import { 
   ContentItem, 
@@ -43,11 +44,11 @@ import {
   createImagePreview
 } from '../../types/content';
 import { useContent } from '../../hooks/useContent';
-import { useUserPreferences } from '../../hooks/useUserPreferences';
 import styles from './ContentManager.module.css';
 
 export function ContentManager() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
@@ -57,7 +58,6 @@ export function ContentManager() {
   const [slideshowWindow, setSlideshowWindow] = useState<Window | null>(null);
 
   const { content, addContent, addMultipleContent, removeContent, getImageContent, getVideoContent } = useContent();
-  const { preferences } = useUserPreferences();
 
   const handleImageUpload = async (files: File[] | null) => {
     if (!files || files.length === 0) return;
@@ -129,6 +129,56 @@ export function ContentManager() {
     addContent(videoContent);
     setSuccess('YouTube video added successfully');
     setYoutubeUrl('');
+  };
+
+  const handleImageUrlAdd = () => {
+    setError(null);
+    setSuccess(null);
+
+    if (!imageUrl.trim()) {
+      setError('Please enter an image URL');
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(imageUrl);
+    } catch {
+      setError('Please enter a valid URL');
+      return;
+    }
+
+    // Check if URL looks like an image
+    const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?.*)?$/i;
+    const isImageUrl = imageExtensions.test(imageUrl) || imageUrl.includes('imgur') || imageUrl.includes('i.redd.it');
+    
+    if (!isImageUrl) {
+      setError('URL does not appear to be an image. Supported formats: JPG, PNG, GIF, WebP, SVG, BMP');
+      return;
+    }
+
+    // Test if the image can be loaded
+    const testImage = document.createElement('img');
+    testImage.onload = () => {
+      const imageContent: ImageContent = {
+        id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: `Image from URL`,
+        type: 'image',
+        url: imageUrl,
+        thumbnail: imageUrl,
+        createdAt: new Date(),
+      };
+
+      addContent(imageContent);
+      setSuccess('Image from URL added successfully');
+      setImageUrl('');
+    };
+    
+    testImage.onerror = () => {
+      setError('Could not load image from URL. Please check the URL and try again.');
+    };
+    
+    testImage.src = imageUrl;
   };
 
   const handleRemoveContent = (contentId: string) => {
@@ -486,7 +536,7 @@ export function ContentManager() {
 
         {/* Upload Controls */}
         <Grid>
-          <Grid.Col span={{ base: 12, md: 6 }}>
+          <Grid.Col span={{ base: 12, md: 4 }}>
             <Card shadow="sm" padding="lg" radius="md" withBorder>
               <Stack gap="md">
                 <Text size="lg" fw={600}>Upload Images</Text>
@@ -505,7 +555,39 @@ export function ContentManager() {
             </Card>
           </Grid.Col>
 
-          <Grid.Col span={{ base: 12, md: 6 }}>
+          <Grid.Col span={{ base: 12, md: 4 }}>
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
+              <Stack gap="md">
+                <Text size="lg" fw={600}>Add Image from URL</Text>
+                <Stack gap="sm">
+                  <TextInput
+                    label="Image URL"
+                    placeholder="https://example.com/image.jpg"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    leftSection={<IconLink size={16} />}
+                  />
+                  <Group>
+                    <Button size="sm" onClick={handleImageUrlAdd}>
+                      Add Image
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="subtle" 
+                      onClick={() => setImageUrl('')}
+                    >
+                      Clear
+                    </Button>
+                  </Group>
+                </Stack>
+                <Text size="xs" c="dimmed">
+                  Direct links to JPG, PNG, GIF, WebP, SVG, or BMP images
+                </Text>
+              </Stack>
+            </Card>
+          </Grid.Col>
+
+          <Grid.Col span={{ base: 12, md: 4 }}>
             <Card shadow="sm" padding="lg" radius="md" withBorder>
               <Stack gap="md">
                 <Text size="lg" fw={600}>Add YouTube Video</Text>
@@ -639,7 +721,7 @@ export function ContentManager() {
 
         {content.length === 0 && (
           <Text ta="center" c="dimmed" size="lg" py="xl">
-            No content uploaded yet. Add some images or YouTube videos to get started!
+            No content added yet. Upload images, add image URLs, or link YouTube videos to get started!
           </Text>
         )}
       </Stack>
