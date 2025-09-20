@@ -5,11 +5,12 @@ import { CharacterManager } from './components/CharacterManager/CharacterManager
 import { ContentManager } from './components/ContentManager/ContentManager';
 import { SettingsManager } from './components/SettingsManager/SettingsManager';
 import { GMNotesManager } from './components/GMNotesManager/GMNotesManager';
+import { Reference } from './components/Reference/Reference';
 import { useCharacters } from './hooks/useCharacters';
 import { useContent } from './hooks/useContent';
 import { useGMNotes } from './hooks/useGMNotes';
 import { Tabs } from '@mantine/core';
-import { IconUser, IconPhoto, IconSettings, IconNotes } from '@tabler/icons-react';
+import { IconUser, IconPhoto, IconSettings, IconNotes, IconBook } from '@tabler/icons-react';
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -33,6 +34,9 @@ export default function Home() {
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
               GM Notes ({notes.length})
             </Tabs.Tab>
+            <Tabs.Tab value="reference" leftSection={<IconBook size={16} />}>
+              Reference
+            </Tabs.Tab>
             <Tabs.Tab value="settings" leftSection={<IconSettings size={16} />}>
               Settings
             </Tabs.Tab>
@@ -48,6 +52,10 @@ export default function Home() {
 
           <Tabs.Panel value="notes" pt="md">
             <GMNotesManager />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="reference" pt="md">
+            <Reference />
           </Tabs.Panel>
 
           <Tabs.Panel value="settings" pt="md">

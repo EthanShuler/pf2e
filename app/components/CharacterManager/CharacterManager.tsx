@@ -219,7 +219,7 @@ export function CharacterManager() {
                             <Text fw={700} size="lg">{character.name}</Text>
                             <Group gap="xs">
                               <Badge variant="default">
-                                Level {character.level} {character.class} {character.ancestry}
+                                Level {character.level} {character.ancestry} {character.class}
                               </Badge>
                             </Group>
                           </Stack>

@@ -202,7 +202,7 @@ export function SettingsManager() {
               <Text size="sm">Notification Position</Text>
               <Select
                 value={preferences.notifications.position}
-                onChange={(value) => updateNestedPreference('notifications', 'position', (value || 'top-right') as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right')}
+                onChange={(value) => updateNestedPreference('notifications', 'position', (value || 'top-left') as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right')}
                 data={[
                   { value: 'top-left', label: 'Top Left' },
                   { value: 'top-right', label: 'Top Right' },
