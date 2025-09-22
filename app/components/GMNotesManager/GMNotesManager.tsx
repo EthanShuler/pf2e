@@ -236,7 +236,7 @@ export function GMNotesManager() {
                         withBorder
                         style={{ 
                           cursor: 'pointer',
-                          backgroundColor: selectedNote?.id === note.id ? 'var(--mantine-color-blue-0)' : undefined
+                          backgroundColor: selectedNote?.id === note.id ? 'var(--mantine-color-blue-9)' : undefined
                         }}
                         onClick={() => {
                           setSelectedNote(note);
@@ -252,7 +252,7 @@ export function GMNotesManager() {
                             <ActionIcon
                               size="xs"
                               color="red"
-                              variant="subtle"
+                              variant="filled"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setNoteToDelete(note);
