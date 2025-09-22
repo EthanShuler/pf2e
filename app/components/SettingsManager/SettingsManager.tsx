@@ -11,9 +11,6 @@ import {
   Alert,
   Modal,
   Divider,
-  Switch,
-  Select,
-  NumberInput,
   Badge,
   FileInput,
   Card,
@@ -29,7 +26,6 @@ import {
   IconFile,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { useUserPreferences, UserPreferences } from '../../hooks/useUserPreferences';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useContent } from '../../hooks/useContent';
 import { useGMNotes, GMNote } from '../../hooks/useGMNotes';
@@ -41,7 +37,6 @@ interface ExportData {
   timestamp: string;
   characters: ProcessedCharacter[];
   content: ContentItem[];
-  preferences: UserPreferences;
   gmNotes: GMNote[];
 }
 
@@ -51,13 +46,6 @@ export function SettingsManager() {
   const [clearDataModalOpen, setClearDataModalOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [exportData, setExportData] = useState('');
-
-  const {
-    preferences,
-    updatePreference,
-    updateNestedPreference,
-    resetToDefaults,
-  } = useUserPreferences();
 
   const { characters, clearAllCharacters } = useCharacters();
   const { content, clearAllContent } = useContent();
@@ -69,7 +57,6 @@ export function SettingsManager() {
       timestamp: new Date().toISOString(),
       characters,
       content,
-      preferences,
       gmNotes,
     };
   };
@@ -116,7 +103,7 @@ export function SettingsManager() {
       const data: ExportData = JSON.parse(importText);
       
       // Validate the data structure
-      if (!data.version || !data.characters || !data.content || !data.preferences) {
+      if (!data.version || !data.characters || !data.content || !data.gmNotes) {
         throw new Error('Invalid export format');
       }
 
@@ -146,7 +133,6 @@ export function SettingsManager() {
     clearAllCharacters();
     clearAllContent();
     clearAllNotes();
-    resetToDefaults();
     setClearDataModalOpen(false);
     
     notifications.show({
@@ -177,85 +163,8 @@ export function SettingsManager() {
       <Stack gap="xl">
         <Group justify="center">
           <IconSettings size={32} />
-          <Text size="xl" fw={700}>Settings & Data Management</Text>
+          <Text size="xl" fw={700}>Data Management</Text>
         </Group>
-
-        {/* User Preferences */}
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <Text size="lg" fw={600} mb="md">User Preferences</Text>
-          <Stack gap="md">
-            <Group justify="space-between">
-              <Text size="sm">Theme</Text>
-              <Select
-                value={preferences.theme}
-                onChange={(value) => updatePreference('theme', (value || 'auto') as 'light' | 'dark' | 'auto')}
-                data={[
-                  { value: 'light', label: 'Light' },
-                  { value: 'dark', label: 'Dark' },
-                  { value: 'auto', label: 'Auto' },
-                ]}
-                w={120}
-              />
-            </Group>
-
-            <Group justify="space-between">
-              <Text size="sm">Notification Position</Text>
-              <Select
-                value={preferences.notifications.position}
-                onChange={(value) => updateNestedPreference('notifications', 'position', (value || 'top-left') as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right')}
-                data={[
-                  { value: 'top-left', label: 'Top Left' },
-                  { value: 'top-right', label: 'Top Right' },
-                  { value: 'bottom-left', label: 'Bottom Left' },
-                  { value: 'bottom-right', label: 'Bottom Right' },
-                ]}
-                w={130}
-              />
-            </Group>
-
-            <Group justify="space-between">
-              <Text size="sm">Notification Duration (ms)</Text>
-              <NumberInput
-                value={preferences.notifications.duration}
-                onChange={(value) => updateNestedPreference('notifications', 'duration', Number(value))}
-                min={1000}
-                max={10000}
-                step={500}
-                w={120}
-              />
-            </Group>
-
-            <Group justify="space-between">
-              <Text size="sm">Show Critical Results</Text>
-              <Switch
-                checked={preferences.diceRolls.showCriticals}
-                onChange={(event) => updateNestedPreference('diceRolls', 'showCriticals', event.currentTarget.checked)}
-              />
-            </Group>
-
-            <Group justify="space-between">
-              <Text size="sm">Show Roll Breakdown</Text>
-              <Switch
-                checked={preferences.diceRolls.showBreakdown}
-                onChange={(event) => updateNestedPreference('diceRolls', 'showBreakdown', event.currentTarget.checked)}
-              />
-            </Group>
-
-            <Group justify="space-between">
-              <Text size="sm">Show Tooltips</Text>
-              <Switch
-                checked={preferences.ui.showTooltips}
-                onChange={(event) => updateNestedPreference('ui', 'showTooltips', event.currentTarget.checked)}
-              />
-            </Group>
-
-            <Group justify="center" mt="md">
-              <Button onClick={resetToDefaults} variant="light" color="orange">
-                Reset to Defaults
-              </Button>
-            </Group>
-          </Stack>
-        </Card>
 
         {/* Storage Info */}
         <Card shadow="sm" padding="lg" radius="md" withBorder>

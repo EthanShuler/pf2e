@@ -21,7 +21,6 @@ import { IconUpload, IconUser, IconAlertCircle, IconCheck, IconTrash, IconDice }
 import { PathbuilderCharacter, ProcessedCharacter } from '../../types/character';
 import { processPathbuilderCharacter } from '../../utils/characterProcessor';
 import { useCharacters } from '../../hooks/useCharacters';
-import { useUserPreferences } from '../../hooks/useUserPreferences';
 import styles from './CharacterManager.module.css';
 
 export function CharacterManager() {
@@ -31,7 +30,6 @@ export function CharacterManager() {
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
 
   const { characters, addCharacter, removeCharacter } = useCharacters();
-  const { preferences } = useUserPreferences();
 
   const handleImport = async () => {
     if (!importText.trim()) {
@@ -108,10 +106,10 @@ export function CharacterManager() {
     let color = 'blue';
     let title = `${characterName} - ${skillName}`;
     
-    if (isCritSuccess && preferences.diceRolls.showCriticals) {
+    if (isCritSuccess) {
       color = 'green';
       title += ' NAT 20';
-    } else if (isCritFailure && preferences.diceRolls.showCriticals) {
+    } else if (isCritFailure) {
       color = 'red';
       title += ' NAT 1';
     }
@@ -128,7 +126,7 @@ export function CharacterManager() {
             <Text span fw={700} c={d20Roll === 20 ? 'green' : d20Roll === 1 ? 'red' : undefined} size="lg">
               {d20Roll}
             </Text>
-            {modifier !== 0 && preferences.diceRolls.showBreakdown && (
+            {modifier !== 0 && (
               <>
                 <Text span size="sm"> + </Text>
                 <Text span fw={600} size="md">{modifier}</Text>
@@ -142,11 +140,11 @@ export function CharacterManager() {
         </Group>
       ),
       color,
-      autoClose: preferences.notifications.duration,
+      autoClose: 5000,
       withCloseButton: true,
       withBorder: true,
       radius: 'md',
-      position: preferences.notifications.position,
+      position: 'top-left',
     });
   };
 
