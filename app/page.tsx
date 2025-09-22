@@ -6,6 +6,7 @@ import { ContentManager } from './components/ContentManager/ContentManager';
 import { SettingsManager } from './components/SettingsManager/SettingsManager';
 import { GMNotesManager } from './components/GMNotesManager/GMNotesManager';
 import { Reference } from './components/Reference/Reference';
+import { ThemeToggle } from './components/ThemeToggle/ThemeToggle';
 import { useCharacters } from './hooks/useCharacters';
 import { useContent } from './hooks/useContent';
 import { useGMNotes } from './hooks/useGMNotes';
@@ -66,6 +67,11 @@ export default function Home() {
         {/* Floating Dice Roller */}
         <FloatingDiceRoller />
       </main>
+
+      {/* Footer with Theme Toggle */}
+      <footer className={styles.footer}>
+        <ThemeToggle />
+      </footer>
     </div>
   );
 }
