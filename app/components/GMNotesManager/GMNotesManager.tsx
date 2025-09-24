@@ -19,6 +19,7 @@ import {
   Alert,
 } from '@mantine/core';
 import { RichTextEditor, Link } from '@mantine/tiptap';
+import classes from './GMNotesManager.module.css';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { 
@@ -57,12 +58,12 @@ export function GMNotesManager() {
     immediatelyRender: false,
   });
 
-  // Update editor content when selected note changes
+  // Update editor content when selected note changes or when entering edit mode
   React.useEffect(() => {
-    if (editor && selectedNote) {
+    if (editor && selectedNote && (isEditing || isCreating)) {
       editor.commands.setContent(selectedNote.content);
     }
-  }, [selectedNote, editor]);
+  }, [selectedNote, editor, isEditing, isCreating]);
 
   const handleCreateNote = () => {
     if (!newTitle.trim()) {
@@ -316,7 +317,7 @@ export function GMNotesManager() {
                       </Group>
                       
                       <Group>
-                        {isEditing ? (
+                        {isEditing || isCreating ? (
                           <>
                             <Button size="xs" onClick={isCreating ? handleCreateNote : handleUpdateNote}>
                               <IconCheck size={14} />
@@ -325,11 +326,23 @@ export function GMNotesManager() {
                               <IconX size={14} />
                             </Button>
                           </>
-                        ) : (
-                          <Button size="xs" leftSection={<IconEdit size={14} />} onClick={() => setIsEditing(true)}>
-                            Edit
-                          </Button>
-                        )}
+                        ) : selectedNote && !isCreating ? (
+                          <>
+                            <Button size="xs" leftSection={<IconEdit size={14} />} onClick={() => setIsEditing(true)}>
+                              Edit
+                            </Button>
+                            <ActionIcon 
+                              variant="subtle" 
+                              color="red" 
+                              onClick={() => {
+                                setNoteToDelete(selectedNote);
+                                setDeleteModalOpen(true);
+                              }}
+                            >
+                              <IconTrash size={16} />
+                            </ActionIcon>
+                          </>
+                        ) : null}
                       </Group>
                     </Group>
 
@@ -380,60 +393,67 @@ export function GMNotesManager() {
 
                 <div style={{ flex: 1 }}>
                   {selectedNote || isCreating ? (
-                    <RichTextEditor editor={editor} style={{ height: '100%' }}>
-                      <RichTextEditor.Toolbar sticky stickyOffset={60}>
-                        <RichTextEditor.ControlsGroup>
-                          <RichTextEditor.Bold />
-                          <RichTextEditor.Italic />
-                          <RichTextEditor.Underline />
-                          <RichTextEditor.Strikethrough />
-                          <RichTextEditor.ClearFormatting />
-                          <RichTextEditor.Highlight />
-                          <RichTextEditor.Code />
-                        </RichTextEditor.ControlsGroup>
+                    (isEditing || isCreating) ? (
+                      <RichTextEditor editor={editor} style={{ height: '100%' }}>
+                        <RichTextEditor.Toolbar sticky stickyOffset={60}>
+                          <RichTextEditor.ControlsGroup>
+                            <RichTextEditor.Bold />
+                            <RichTextEditor.Italic />
+                            <RichTextEditor.Underline />
+                            <RichTextEditor.Strikethrough />
+                            <RichTextEditor.ClearFormatting />
+                            <RichTextEditor.Highlight />
+                            <RichTextEditor.Code />
+                          </RichTextEditor.ControlsGroup>
 
-                        <RichTextEditor.ControlsGroup>
-                          <RichTextEditor.H1 />
-                          <RichTextEditor.H2 />
-                          <RichTextEditor.H3 />
-                          <RichTextEditor.H4 />
-                        </RichTextEditor.ControlsGroup>
+                          <RichTextEditor.ControlsGroup>
+                            <RichTextEditor.H1 />
+                            <RichTextEditor.H2 />
+                            <RichTextEditor.H3 />
+                            <RichTextEditor.H4 />
+                          </RichTextEditor.ControlsGroup>
 
-                        <RichTextEditor.ControlsGroup>
-                          <RichTextEditor.Blockquote />
-                          <RichTextEditor.Hr />
-                          <RichTextEditor.BulletList />
-                          <RichTextEditor.OrderedList />
-                          <RichTextEditor.Subscript />
-                          <RichTextEditor.Superscript />
-                        </RichTextEditor.ControlsGroup>
+                          <RichTextEditor.ControlsGroup>
+                            <RichTextEditor.Blockquote />
+                            <RichTextEditor.Hr />
+                            <RichTextEditor.BulletList />
+                            <RichTextEditor.OrderedList />
+                            <RichTextEditor.Subscript />
+                            <RichTextEditor.Superscript />
+                          </RichTextEditor.ControlsGroup>
 
-                        <RichTextEditor.ControlsGroup>
-                          <RichTextEditor.Link />
-                          <RichTextEditor.Unlink />
-                        </RichTextEditor.ControlsGroup>
+                          <RichTextEditor.ControlsGroup>
+                            <RichTextEditor.Link />
+                            <RichTextEditor.Unlink />
+                          </RichTextEditor.ControlsGroup>
 
-                        <RichTextEditor.ControlsGroup>
-                          <RichTextEditor.AlignLeft />
-                          <RichTextEditor.AlignCenter />
-                          <RichTextEditor.AlignJustify />
-                          <RichTextEditor.AlignRight />
-                        </RichTextEditor.ControlsGroup>
+                          <RichTextEditor.ControlsGroup>
+                            <RichTextEditor.AlignLeft />
+                            <RichTextEditor.AlignCenter />
+                            <RichTextEditor.AlignJustify />
+                            <RichTextEditor.AlignRight />
+                          </RichTextEditor.ControlsGroup>
 
-                        <RichTextEditor.ControlsGroup>
-                          <RichTextEditor.Undo />
-                          <RichTextEditor.Redo />
-                        </RichTextEditor.ControlsGroup>
-                      </RichTextEditor.Toolbar>
+                          <RichTextEditor.ControlsGroup>
+                            <RichTextEditor.Undo />
+                            <RichTextEditor.Redo />
+                          </RichTextEditor.ControlsGroup>
+                        </RichTextEditor.Toolbar>
 
-                      <RichTextEditor.Content 
-                        style={{ 
-                          minHeight: 400,
-                          maxHeight: 400,
-                          overflowY: 'auto'
-                        }} 
+                        <RichTextEditor.Content 
+                          style={{ 
+                            minHeight: 400,
+                            maxHeight: 400,
+                            overflowY: 'auto'
+                          }} 
+                        />
+                      </RichTextEditor>
+                    ) : (
+                      <div 
+                        className={classes.readOnlyContent}
+                        dangerouslySetInnerHTML={{ __html: selectedNote?.content || '' }}
                       />
-                    </RichTextEditor>
+                    )
                   ) : (
                     <Stack align="center" justify="center" h="100%">
                       <IconNotes size={64} color="var(--mantine-color-gray-4)" />

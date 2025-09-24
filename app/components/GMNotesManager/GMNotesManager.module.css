@@ -48,6 +48,61 @@
   flex-wrap: wrap;
 }
 
+.readOnlyContent {
+  padding: 1rem;
+  min-height: 400px;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--mantine-color-gray-9);
+  border-radius: var(--mantine-radius-sm);
+  background-color: var(--mantine-color-gray-8);
+  font-family: var(--mantine-font-family);
+  line-height: 1.55;
+}
+
+.readOnlyContent h1,
+.readOnlyContent h2,
+.readOnlyContent h3,
+.readOnlyContent h4,
+.readOnlyContent h5,
+.readOnlyContent h6 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.readOnlyContent p {
+  margin-bottom: 0.75rem;
+}
+
+.readOnlyContent ul,
+.readOnlyContent ol {
+  margin-bottom: 0.75rem;
+  padding-left: 2rem;
+}
+
+.readOnlyContent blockquote {
+  border-left: 4px solid var(--mantine-color-gray-4);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: var(--mantine-color-gray-6);
+}
+
+.readOnlyContent code {
+  background-color: var(--mantine-color-gray-2);
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--mantine-radius-xs);
+  font-family: var(--mantine-font-family-monospace);
+}
+
+.readOnlyContent pre {
+  background-color: var(--mantine-color-gray-2);
+  padding: 1rem;
+  border-radius: var(--mantine-radius-sm);
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
@@ -59,5 +114,10 @@
   
   .richTextEditor {
     min-height: 300px;
+  }
+  
+  .readOnlyContent {
+    min-height: 300px;
+    max-height: 300px;
   }
 }
