@@ -107,7 +107,7 @@ export function FloatingDiceRoller() {
               data={DICE_TYPES}
               value={selectedDice}
               onChange={(value) => setSelectedDice(value || '20')}
-              w={70}
+              w={90}
               allowDeselect={false}
               searchable={false}
               comboboxProps={{ zIndex: 1100 }}

@@ -19,6 +19,27 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
+/* Drag and Drop Styles */
+.contentCard {
+  cursor: grab;
+}
+
+.contentCard:active {
+  cursor: grabbing;
+}
+
+.contentCard[data-dragging="true"] {
+  opacity: 0.5;
+  transform: rotate(5deg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.contentCard[data-drag-overlay="true"] {
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .thumbnailContainer {
   position: relative;
   height: 150px;

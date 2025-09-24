@@ -67,6 +67,21 @@ export function useContent() {
     return content.filter((item): item is VideoContent => item.type === 'video');
   };
 
+  const reorderContent = (activeId: string, overId: string) => {
+    setContent((current) => {
+      const oldIndex = current.findIndex(item => item.id === activeId);
+      const newIndex = current.findIndex(item => item.id === overId);
+      
+      if (oldIndex === -1 || newIndex === -1) return current;
+      
+      const newContent = [...current];
+      const [removed] = newContent.splice(oldIndex, 1);
+      newContent.splice(newIndex, 0, removed);
+      
+      return newContent;
+    });
+  };
+
   const clearAllContent = () => {
     setContent([]);
   };
@@ -81,6 +96,7 @@ export function useContent() {
     getContentById,
     getImageContent,
     getVideoContent,
+    reorderContent,
     clearAllContent,
   };
 }

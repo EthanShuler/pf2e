@@ -19,6 +19,24 @@ import {
   Tooltip,
   ScrollArea,
 } from '@mantine/core';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { 
   IconUpload, 
   IconPhoto, 
@@ -46,6 +64,104 @@ import {
 import { useContent } from '../../hooks/useContent';
 import styles from './ContentManager.module.css';
 
+// Sortable Content Item Component
+function SortableContentItem({
+  item,
+  images,
+  onStartSlideshow,
+  onStartSlideshowInNewWindow,
+  onSelectVideo,
+  onRemove,
+}: {
+  item: ContentItem;
+  images: ImageContent[];
+  onStartSlideshow: (index: number) => void;
+  onStartSlideshowInNewWindow: (index: number) => void;
+  onSelectVideo: (item: ContentItem) => void;
+  onRemove: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <Card 
+        shadow="sm" 
+        padding="md" 
+        radius="md" 
+        withBorder 
+        className={styles.contentCard}
+        style={{ 
+          cursor: isDragging ? 'grabbing' : 'grab',
+          border: isDragging ? '2px dashed #666' : undefined
+        }}
+        {...listeners}
+      >
+        <Stack gap="sm">
+          {/* Thumbnail */}
+          <div className={styles.thumbnailContainer}>
+            {item.type === 'image' ? (
+              <Image
+                src={item.thumbnail || item.url}
+                alt={item.name}
+                fit="cover"
+                className={styles.thumbnail}
+                onClick={() => onStartSlideshow(images.findIndex(img => img.id === item.id))}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  onStartSlideshowInNewWindow(images.findIndex(img => img.id === item.id));
+                }}
+                title="Click to view in slideshow, right-click to open in new window"
+              />
+            ) : (
+              <div 
+                className={styles.videoThumbnail}
+                onClick={() => onSelectVideo(item)}
+              >
+                <Image
+                  src={item.thumbnail}
+                  alt={item.name}
+                  fit="cover"
+                  className={styles.thumbnail}
+                />
+                <div className={styles.playButton}>
+                  <IconPlayerPlay size={24} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <Group justify="space-between">
+            <ActionIcon
+              color="red"
+              variant="filled"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove(item.id);
+              }}
+            >
+              <IconTrash size={16} />
+            </ActionIcon>
+          </Group>
+        </Stack>
+      </Card>
+    </div>
+  );
+}
+
 export function ContentManager() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -57,7 +173,23 @@ export function ContentManager() {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [slideshowWindow, setSlideshowWindow] = useState<Window | null>(null);
 
-  const { content, addContent, addMultipleContent, removeContent, getImageContent, getVideoContent } = useContent();
+  const { content, addContent, addMultipleContent, removeContent, getImageContent, getVideoContent, reorderContent } = useContent();
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      reorderContent(active.id as string, over.id as string);
+    }
+  };
 
   const handleImageUpload = async (files: File[] | null) => {
     if (!files || files.length === 0) return;
@@ -642,79 +774,53 @@ export function ContentManager() {
 
             {/* Slideshow Controls */}
             {images.length > 0 && (
-              <Group justify="center">
-                <Button
-                  leftSection={<IconEye size={16} />}
-                  onClick={() => startSlideshow(0)}
-                  variant="default"
-                >
-                  Start Slideshow ({images.length} images)
-                </Button>
-                <Button
-                  leftSection={<IconPlus size={16} />}
-                  onClick={() => startSlideshowInNewWindow(0)}
-                  variant="outline"
-                >
-                  Open in New Window
-                </Button>
-              </Group>
+              <Stack gap="sm">
+                <Group justify="center">
+                  <Button
+                    leftSection={<IconEye size={16} />}
+                    onClick={() => startSlideshow(0)}
+                    variant="default"
+                  >
+                    Start Slideshow ({images.length} images)
+                  </Button>
+                  <Button
+                    leftSection={<IconPlus size={16} />}
+                    onClick={() => startSlideshowInNewWindow(0)}
+                    variant="outline"
+                  >
+                    Open in New Window
+                  </Button>
+                </Group>
+                <Text size="sm" c="dimmed" ta="center">
+                  💡 Drag and drop items to reorder them in the slideshow
+                </Text>
+              </Stack>
             )}
 
-            {/* Content Grid */}
+            {/* Content Grid with Drag and Drop */}
             <ScrollArea h={500}>
-              <Grid>
-                {content.map((item) => (
-                  <Grid.Col key={item.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
-                    <Card shadow="sm" padding="md" radius="md" withBorder className={styles.contentCard}>
-                      <Stack gap="sm">
-                        {/* Thumbnail */}
-                        <div className={styles.thumbnailContainer}>
-                          {item.type === 'image' ? (
-                            <Image
-                              src={item.thumbnail || item.url}
-                              alt={item.name}
-                              fit="cover"
-                              className={styles.thumbnail}
-                              onClick={() => startSlideshow(images.findIndex(img => img.id === item.id))}
-                              onContextMenu={(e) => {
-                                e.preventDefault();
-                                startSlideshowInNewWindow(images.findIndex(img => img.id === item.id));
-                              }}
-                              title="Click to view in slideshow, right-click to open in new window"
-                            />
-                          ) : (
-                            <div 
-                              className={styles.videoThumbnail}
-                              onClick={() => setSelectedContent(item)}
-                            >
-                              <Image
-                                src={item.thumbnail}
-                                alt={item.name}
-                                fit="cover"
-                                className={styles.thumbnail}
-                              />
-                              <div className={styles.playButton}>
-                                <IconPlayerPlay size={24} />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Actions */}
-                        <Group justify="space-between">
-                          <ActionIcon
-                            color="red"
-                            variant="filled"
-                            onClick={() => handleRemoveContent(item.id)}
-                          >
-                            <IconTrash size={16} />
-                          </ActionIcon>
-                        </Group>
-                      </Stack>
-                    </Card>
-                  </Grid.Col>
-                ))}
-              </Grid>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={content.map(item => item.id)} strategy={rectSortingStrategy}>
+                  <Grid>
+                    {content.map((item) => (
+                      <Grid.Col key={item.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+                        <SortableContentItem
+                          item={item}
+                          images={images}
+                          onStartSlideshow={startSlideshow}
+                          onStartSlideshowInNewWindow={startSlideshowInNewWindow}
+                          onSelectVideo={setSelectedContent}
+                          onRemove={handleRemoveContent}
+                        />
+                      </Grid.Col>
+                    ))}
+                  </Grid>
+                </SortableContext>
+              </DndContext>
             </ScrollArea>
           </>
         )}
