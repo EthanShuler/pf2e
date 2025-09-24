@@ -156,8 +156,6 @@ export function SettingsManager() {
     }
   };
 
-  const storageInfo = getStorageUsage();
-
   return (
     <Paper p="xl" shadow="sm">
       <Stack gap="xl">
@@ -180,13 +178,13 @@ export function SettingsManager() {
               GM Notes: {gmNotes.length}
             </Badge>
             <Badge variant="light">
-              Used: {storageInfo.used} KB
+              Used: {getStorageUsage().used} KB
             </Badge>
             <Badge variant="light">
-              Total: {storageInfo.total} KB
+              Total: {getStorageUsage().total} KB
             </Badge>
-            <Badge variant="light" color={storageInfo.percentage > 80 ? 'red' : storageInfo.percentage > 60 ? 'orange' : 'green'}>
-              {storageInfo.percentage}% Used
+            <Badge variant="light" color={getStorageUsage().percentage > 80 ? 'red' : getStorageUsage().percentage > 60 ? 'orange' : 'green'}>
+              {getStorageUsage().percentage}% Used
             </Badge>
           </Group>
         </Card>

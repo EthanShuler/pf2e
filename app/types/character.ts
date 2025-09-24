@@ -171,6 +171,8 @@ export interface ProcessedCharacter {
   saves: SaveData[];
   attacks: AttackData[];
   spellcasting: SpellcastingData[];
+  perception: SkillData;
+  loreSkills: SkillData[];
   ac: number;
   hp: number;
   lores: Lore[];

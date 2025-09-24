@@ -83,6 +83,36 @@ export function processPathbuilderCharacter(pathbuilderData: PathbuilderCharacte
     },
   ].filter(attack => attack.proficiency > 0);
 
+  // Process perception
+  const perceptionProficiency = build.proficiencies.perception;
+  const perceptionAbilityMod = abilityMods.wis;
+  const perceptionProfBonus = perceptionProficiency === 0 ? 0 : perceptionProficiency + build.level;
+  const perception: SkillData = {
+    name: 'Perception',
+    ability: 'WIS',
+    proficiency: perceptionProficiency,
+    total: perceptionAbilityMod + perceptionProfBonus,
+    abilityMod: perceptionAbilityMod,
+    profBonus: perceptionProfBonus,
+  };
+
+  // Process lores into SkillData format
+  const loreSkills: SkillData[] = build.lores.map(([loreName, proficiency]) => {
+    // Lores use Intelligence as their key ability
+    const abilityMod = abilityMods.int;
+    const profBonus = proficiency === 0 ? 0 : proficiency + build.level;
+    const total = abilityMod + profBonus;
+
+    return {
+      name: loreName,
+      ability: 'INT',
+      proficiency,
+      total,
+      abilityMod,
+      profBonus,
+    };
+  });
+
   // Process spellcasting
   const spellcasting: SpellcastingData[] = build.spellCasters.map(caster => {
     const abilityKey = caster.ability as keyof typeof abilityMods;
@@ -119,6 +149,8 @@ export function processPathbuilderCharacter(pathbuilderData: PathbuilderCharacte
     saves,
     attacks,
     spellcasting,
+    perception,
+    loreSkills,
     ac: build.acTotal.acTotal,
     hp,
     lores: build.lores,

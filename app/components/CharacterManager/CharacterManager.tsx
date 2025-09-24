@@ -249,6 +249,28 @@ export function CharacterManager() {
                           <Group gap="xs">
                             <Badge variant="default">AC: {character.ac}</Badge>
                             <Badge variant="default">HP: {character.hp}</Badge>
+                            {character.perception && (
+                              <Tooltip
+                                label={`DC: ${10 + character.perception.total} | WIS ${character.perception.abilityMod > 0 ? '+' : ''}${character.perception.abilityMod} + Prof ${character.perception.profBonus}`}
+                                withArrow
+                                position="top"
+                                events={{ hover: true, focus: false, touch: false }}
+                              >
+                                <Badge 
+                                  color={getProficiencyColor(character.perception.proficiency)}
+                                  variant="default"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleRoll(character.perception.total, 'Perception', character.name);
+                                  }}
+                                  style={{ cursor: 'pointer' }}
+                                >
+                                  Perception: {character.perception.total > 0 && '+'}{character.perception.total}
+                                </Badge>
+                              </Tooltip>
+                            )}
                           </Group>
                         </div>
 
@@ -344,6 +366,38 @@ export function CharacterManager() {
                               ))}
                           </Group>
                         </div>
+
+                        {/* Lore Skills */}
+                        {character.loreSkills && character.loreSkills.length > 0 && (
+                          <div>
+                            <Text size="sm" fw={600} mb="xs">Lore Skills</Text>
+                            <Group gap="xs">
+                              {character.loreSkills.map((lore) => (
+                                <Tooltip
+                                  key={lore.name}
+                                  label={`DC: ${10 + lore.total} | ${lore.ability} ${lore.abilityMod > 0 ? '+' : ''}${lore.abilityMod} + Prof ${lore.profBonus}`}
+                                  withArrow
+                                  position="top"
+                                  events={{ hover: true, focus: false, touch: false }}
+                                >
+                                  <Badge 
+                                    color={getProficiencyColor(lore.proficiency)}
+                                    variant="default"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleRoll(lore.total, lore.name, character.name);
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                  >
+                                    {lore.name}: {lore.total > 0 && '+'}{lore.total}
+                                  </Badge>
+                                </Tooltip>
+                              ))}
+                            </Group>
+                          </div>
+                        )}
 
                         {/* Spellcasting */}
                         {character.spellcasting.length > 0 && (
